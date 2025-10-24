@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Transition House Cobourg - Shelter Management Platform">
+    <title>Transition House Cobourg</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+</head>
+<body>
+    <div id="app">
+        <!-- Login Screen -->
+        <div id="login-screen" class="screen active">
+            <div class="login-container">
+                <div class="logo">
+                    <h1>Transition House</h1>
+                    <p>Cobourg Shelter Management</p>
+                </div>
+                
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    
+                    <div class="form-footer">
+                        <a href="#register">Register</a> | 
+                        <a href="#forgot">Forgot Password?</a>
+                    </div>
+                </form>
+                
+                <div id="login-message" class="message"></div>
+            </div>
+        </div>
+
+        <!-- Dashboard Screen -->
+        <div id="dashboard-screen" class="screen">
+            <header>
+                <div class="header-content">
+                    <h2>Dashboard</h2>
+                    <div class="user-info">
+                        <span id="user-name"></span>
+                        <span id="user-role" class="badge"></span>
+                        <button id="logout-btn" class="btn btn-small">Logout</button>
+                    </div>
+                </div>
+                
+                <nav class="main-nav">
+                    <button class="nav-btn active" data-section="overview">Overview</button>
+                    <button class="nav-btn" data-section="beds">Beds</button>
+                    <button class="nav-btn" data-section="intake">Intake</button>
+                    <button class="nav-btn" data-section="cases">Cases</button>
+                    <button class="nav-btn" data-section="messages">Messages</button>
+                    <button class="nav-btn" data-section="peers">Peers</button>
+                    <button class="nav-btn" data-section="resources">Resources</button>
+                </nav>
+            </header>
+
+            <main>
+                <!-- Overview Section -->
+                <section id="overview-section" class="content-section active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Total Beds</h3>
+                            <div class="stat-value" id="total-beds">--</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <h3>Available Beds</h3>
+                            <div class="stat-value available" id="available-beds">--</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <h3>Occupied Beds</h3>
+                            <div class="stat-value occupied" id="occupied-beds">--</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <h3>Active Intakes</h3>
+                            <div class="stat-value" id="active-intakes">--</div>
+                        </div>
+                    </div>
+                    
+                    <div class="announcements">
+                        <h3>Announcements</h3>
+                        <div id="announcements-list"></div>
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <h3>Quick Actions</h3>
+                        <button class="btn btn-primary" onclick="showSection('intake')">New Intake</button>
+                        <button class="btn btn-secondary" onclick="showSection('beds')">View Bed Map</button>
+                        <button class="btn btn-secondary" onclick="showSection('messages')">Messages</button>
+                    </div>
+                </section>
+
+                <!-- Beds Section -->
+                <section id="beds-section" class="content-section">
+                    <div class="section-header">
+                        <h3>Bed Management</h3>
+                        <button class="btn btn-primary" id="refresh-beds">Refresh</button>
+                    </div>
+                    
+                    <div class="bed-map" id="bed-map">
+                        <!-- Beds will be loaded dynamically -->
+                    </div>
+                </section>
+
+                <!-- Intake Section -->
+                <section id="intake-section" class="content-section">
+                    <div class="section-header">
+                        <h3>Intake Management</h3>
+                        <button class="btn btn-primary" id="new-intake-btn">New Intake</button>
+                    </div>
+                    
+                    <div id="intake-list">
+                        <!-- Intakes will be loaded dynamically -->
+                    </div>
+                    
+                    <div id="intake-form" class="modal">
+                        <div class="modal-content">
+                            <span class="close">&times;</span>
+                            <h3>New Intake Form</h3>
+                            <form id="intake-form-content">
+                                <div class="form-group">
+                                    <label>Client Email</label>
+                                    <input type="email" name="client_email" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Housing History</label>
+                                    <textarea name="housing_history" rows="4"></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Risk Assessment</label>
+                                    <textarea name="risk_assessment" rows="4"></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Support Needs</label>
+                                    <textarea name="supports" rows="4"></textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Submit Intake</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Cases Section -->
+                <section id="cases-section" class="content-section">
+                    <div class="section-header">
+                        <h3>Case Management</h3>
+                        <button class="btn btn-primary" id="new-case-btn">New Case</button>
+                    </div>
+                    
+                    <div id="cases-list">
+                        <!-- Cases will be loaded dynamically -->
+                    </div>
+                </section>
+
+                <!-- Messages Section -->
+                <section id="messages-section" class="content-section">
+                    <div class="messaging-container">
+                        <div class="conversations-list">
+                            <h3>Conversations</h3>
+                            <div id="conversations">
+                                <!-- Conversations will be loaded dynamically -->
+                            </div>
+                        </div>
+                        
+                        <div class="message-view">
+                            <div class="message-header">
+                                <h3 id="conversation-title">Select a conversation</h3>
+                            </div>
+                            
+                            <div class="messages-container" id="messages-container">
+                                <!-- Messages will be loaded dynamically -->
+                            </div>
+                            
+                            <div class="message-input">
+                                <form id="message-form">
+                                    <input type="text" id="message-content" placeholder="Type a message..." required>
+                                    <button type="submit" class="btn btn-primary">Send</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Peers Section -->
+                <section id="peers-section" class="content-section">
+                    <div class="section-header">
+                        <h3>Peer Network</h3>
+                        <button class="btn btn-primary" id="find-mentor-btn">Find Mentor</button>
+                    </div>
+                    
+                    <div class="mentors-grid" id="mentors-grid">
+                        <!-- Mentors will be loaded dynamically -->
+                    </div>
+                </section>
+
+                <!-- Resources Section -->
+                <section id="resources-section" class="content-section">
+                    <div class="section-header">
+                        <h3>Resource Directory</h3>
+                        <input type="text" id="resource-search" placeholder="Search resources...">
+                    </div>
+                    
+                    <div class="resources-grid" id="resources-grid">
+                        <!-- Resources will be loaded dynamically -->
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
