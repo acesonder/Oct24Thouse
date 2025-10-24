@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Build artifacts
+dist/
+build/
+*.min.js
+*.min.css
+
+# Uploads and temporary files
+uploads/
+temp/
+tmp/
+
+# Database
+*.db
+*.sqlite
+
+# Cache
+cache/
+*.cache
