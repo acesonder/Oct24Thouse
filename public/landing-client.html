@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Clients - Transition House Cobourg</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        .hero-client {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            padding: 100px 20px;
+            text-align: center;
+        }
+        
+        .hero-client h1 {
+            font-size: 42px;
+            margin-bottom: 20px;
+        }
+        
+        .hero-client p {
+            font-size: 20px;
+            max-width: 800px;
+            margin: 0 auto 40px;
+        }
+        
+        .benefits {
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .benefits h2 {
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 50px;
+            color: #2c3e50;
+        }
+        
+        .benefit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        
+        .benefit-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 4px solid #27ae60;
+        }
+        
+        .benefit-card h3 {
+            color: #27ae60;
+            margin-bottom: 15px;
+        }
+        
+        .benefit-card p {
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+        
+        .cta-section {
+            background: #f8f9fa;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        
+        .cta-section h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .cta-section p {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 40px;
+        }
+        
+        .btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: #27ae60;
+            border: 2px solid #27ae60;
+            margin-left: 15px;
+        }
+        
+        .btn-secondary:hover {
+            background: #27ae60;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <section class="hero-client">
+        <h1>👤 Welcome, We're Here to Help</h1>
+        <p>Find shelter, track your progress, and connect with a supportive community on your journey to stability</p>
+        <button class="btn btn-primary" onclick="window.location.href='index.html'">Access Your Dashboard</button>
+    </section>
+
+    <section class="benefits">
+        <h2>What We Offer You</h2>
+        <div class="benefit-grid">
+            <div class="benefit-card">
+                <h3>🛏️ Find Your Bed Tonight</h3>
+                <p>Check real-time bed availability and request shelter instantly. Safe, warm accommodation available 24/7.</p>
+            </div>
+            
+            <div class="benefit-card">
+                <h3>📈 Track Your Progress</h3>
+                <p>Set personal goals, complete tasks, and celebrate your achievements as you work toward stability.</p>
+            </div>
+            
+            <div class="benefit-card">
+                <h3>🤝 Connect with Peer Mentors</h3>
+                <p>Get support from people who understand your journey. Our peer network is here to guide and encourage you.</p>
+            </div>
+            
+            <div class="benefit-card">
+                <h3>💬 Secure Messaging</h3>
+                <p>Communicate privately with staff, case managers, and peers through our encrypted messaging system.</p>
+            </div>
+            
+            <div class="benefit-card">
+                <h3>📅 Manage Appointments</h3>
+                <p>Keep track of meetings, check-ins, and important dates with our calendar system.</p>
+            </div>
+            
+            <div class="benefit-card">
+                <h3>📚 Access Resources</h3>
+                <p>Browse community services, housing resources, and support programs all in one place.</p>
+            </div>
+            
+            <div class="benefit-card">
+                <h3>🔔 Stay Informed</h3>
+                <p>Receive notifications about available services, updates, and opportunities relevant to you.</p>
+            </div>
+            
+            <div class="benefit-card">
+                <h3>🎯 Personalized Support</h3>
+                <p>Work with your case manager to create a customized plan tailored to your unique needs and goals.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <h2>Ready to Get Started?</h2>
+        <p>Create your account or login to access all our services</p>
+        <button class="btn btn-primary" onclick="window.location.href='index.html#register'">Register Now</button>
+        <button class="btn btn-secondary" onclick="window.location.href='index.html'">Login</button>
+    </section>
+
+    <footer style="background: #2c3e50; color: white; padding: 30px 20px; text-align: center;">
+        <p><a href="landing.html" style="color: #3498db; text-decoration: none;">← Back to Main Page</a></p>
+        <p style="margin-top: 15px;">&copy; 2024 Transition House Cobourg</p>
+    </footer>
+</body>
+</html>

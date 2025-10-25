@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transition House Cobourg - Supporting Our Community</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <style>
+        /* Landing Page Specific Styles */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s;
+        }
+        
+        .hero p {
+            font-size: 24px;
+            margin-bottom: 40px;
+            opacity: 0.95;
+            animation: fadeInUp 1s;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeIn 1.5s;
+        }
+        
+        .cta-btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .cta-btn.primary {
+            background: white;
+            color: #667eea;
+        }
+        
+        .cta-btn.primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .cta-btn.secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .cta-btn.secondary:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        .features {
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .features h2 {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 60px;
+            color: #2c3e50;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+        
+        .feature-card {
+            text-align: center;
+            padding: 30px;
+            border-radius: 10px;
+            transition: all 0.3s;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .feature-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .feature-card p {
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+        
+        .roles {
+            background: #f8f9fa;
+            padding: 80px 20px;
+        }
+        
+        .roles h2 {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 60px;
+            color: #2c3e50;
+        }
+        
+        .role-cards {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        
+        .role-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .role-card h3 {
+            font-size: 24px;
+            margin: 20px 0 15px;
+            color: #2c3e50;
+        }
+        
+        .role-card p {
+            color: #7f8c8d;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .role-card .role-icon {
+            font-size: 48px;
+        }
+        
+        /* Rotating CTA Banner */
+        .rotating-cta {
+            background: linear-gradient(90deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-content {
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s;
+        }
+        
+        .cta-content h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        
+        .cta-content p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        /* Login Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .modal-header h2 {
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .close {
+            font-size: 32px;
+            cursor: pointer;
+            color: #95a5a6;
+        }
+        
+        .close:hover {
+            color: #2c3e50;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>🏠 Welcome to Transition House</h1>
+        <p>Supporting our community through coordinated care and compassionate service</p>
+        <div class="cta-buttons">
+            <button class="cta-btn primary" onclick="openLoginModal()">Get Started</button>
+            <a href="about.html" class="cta-btn secondary">Learn More</a>
+        </div>
+    </section>
+
+    <!-- Rotating Call-to-Action Banner -->
+    <section class="rotating-cta" id="rotating-cta">
+        <div class="cta-content" id="cta-content">
+            <h2 id="cta-title">Find Your Bed Tonight</h2>
+            <p id="cta-description">Safe, warm shelter available 24/7 for those in need</p>
+            <button class="cta-btn primary" onclick="openLoginModal()">Access Services</button>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <h2>Our Platform Features</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🛏️</div>
+                <h3>Real-Time Bed Management</h3>
+                <p>Check availability and request shelter instantly with our live bed tracking system</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3>Secure Messaging</h3>
+                <p>Connect with staff, peers, and support workers through our private messaging system</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Progress Tracking</h3>
+                <p>Set goals, track milestones, and celebrate achievements on your journey</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🤝</div>
+                <h3>Peer Support Network</h3>
+                <p>Connect with mentors who understand your journey and can provide guidance</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📅</div>
+                <h3>Case Management</h3>
+                <p>Coordinated care planning with digital tools for staff and clients</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔔</div>
+                <h3>Smart Notifications</h3>
+                <p>Stay informed with real-time updates on appointments, messages, and opportunities</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Role-Specific Access -->
+    <section class="roles">
+        <h2>Access Portal for Your Role</h2>
+        <div class="role-cards">
+            <div class="role-card" onclick="window.location.href='landing-client.html'">
+                <div class="role-icon">👤</div>
+                <h3>Clients</h3>
+                <p>Access shelter services, track your progress, and connect with support</p>
+                <button class="cta-btn primary">Learn More</button>
+            </div>
+            
+            <div class="role-card" onclick="window.location.href='landing-staff.html'">
+                <div class="role-icon">👨‍💼</div>
+                <h3>Staff & Workers</h3>
+                <p>Manage cases, coordinate care, and streamline your daily operations</p>
+                <button class="cta-btn primary">Learn More</button>
+            </div>
+            
+            <div class="role-card" onclick="window.location.href='landing-partners.html'">
+                <div class="role-icon">🏢</div>
+                <h3>Service Providers</h3>
+                <p>Collaborate on referrals and coordinate community services</p>
+                <button class="cta-btn primary">Learn More</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Login to Transition House</h2>
+                <span class="close" onclick="closeLoginModal()">&times;</span>
+            </div>
+            
+            <form id="landing-login-form">
+                <div class="form-group">
+                    <label for="landing-email">Email</label>
+                    <input type="email" id="landing-email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="landing-password">Password</label>
+                    <input type="password" id="landing-password" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Login</button>
+                
+                <div class="form-footer" style="margin-top: 20px;">
+                    <a href="index.html#register">Register</a> | 
+                    <a href="index.html#forgot">Forgot Password?</a>
+                </div>
+            </form>
+            
+            <div id="landing-login-message" class="message"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Transition House Cobourg. All rights reserved.</p>
+        <p>
+            <a href="about.html">About</a> | 
+            <a href="setup.html">Setup</a> | 
+            <a href="index.html">Dashboard</a>
+        </p>
+        <p style="margin-top: 20px; opacity: 0.8;">
+            Built with ❤️ by Chance Brown | Dedicated to Ethan
+        </p>
+    </footer>
+
+    <script>
+        const API_BASE = '/api';
+        
+        // Rotating CTAs
+        const ctas = [
+            {
+                title: "Find Your Bed Tonight",
+                description: "Safe, warm shelter available 24/7 for those in need"
+            },
+            {
+                title: "Connect with a Peer Mentor",
+                description: "Get support from someone who understands your journey"
+            },
+            {
+                title: "Track Your Progress",
+                description: "Set goals and celebrate achievements on your path to stability"
+            },
+            {
+                title: "Real-Time Bed Status",
+                description: "View available beds and request shelter instantly"
+            },
+            {
+                title: "You're Not Alone",
+                description: "Join our supportive community of peers and professionals"
+            }
+        ];
+        
+        let currentCtaIndex = 0;
+        
+        function rotateCTA() {
+            currentCtaIndex = (currentCtaIndex + 1) % ctas.length;
+            const cta = ctas[currentCtaIndex];
+            
+            const content = document.getElementById('cta-content');
+            content.style.animation = 'none';
+            
+            setTimeout(() => {
+                document.getElementById('cta-title').textContent = cta.title;
+                document.getElementById('cta-description').textContent = cta.description;
+                content.style.animation = 'fadeIn 0.5s';
+            }, 100);
+        }
+        
+        // Rotate CTA every 5 seconds
+        setInterval(rotateCTA, 5000);
+        
+        // Login Modal
+        function openLoginModal() {
+            document.getElementById('login-modal').classList.add('active');
+        }
+        
+        function closeLoginModal() {
+            document.getElementById('login-modal').classList.remove('active');
+        }
+        
+        // Handle login
+        document.getElementById('landing-login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('landing-email').value;
+            const password = document.getElementById('landing-password').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    localStorage.setItem('authToken', data.token);
+                    showMessage('landing-login-message', 'Login successful! Redirecting...', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    showMessage('landing-login-message', data.message || 'Login failed', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage('landing-login-message', 'Network error. Please check your connection.', 'error');
+            }
+        });
+        
+        function showMessage(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.textContent = message;
+                el.className = `message ${type}`;
+                
+                setTimeout(() => {
+                    el.textContent = '';
+                    el.className = 'message';
+                }, 5000);
+            }
+        }
+        
+        // Close modal on outside click
+        document.getElementById('login-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLoginModal();
+            }
+        });
+    </script>
+</body>
+</html>
