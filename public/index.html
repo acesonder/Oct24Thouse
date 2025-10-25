@@ -136,6 +136,24 @@
                 <div class="header-content">
                     <h2>Dashboard</h2>
                     <div class="user-info">
+                        <!-- Notifications Bell -->
+                        <div class="notification-bell" id="notification-bell">
+                            <span class="bell-icon">🔔</span>
+                            <span class="notification-badge" id="notification-badge">0</span>
+                            <div class="notification-dropdown" id="notification-dropdown">
+                                <div class="notification-header">
+                                    <h3>Notifications</h3>
+                                    <button class="btn-link" id="mark-all-read">Mark all read</button>
+                                </div>
+                                <div class="notification-list" id="notification-list">
+                                    <p class="no-notifications">No new notifications</p>
+                                </div>
+                                <div class="notification-footer">
+                                    <a href="#" id="view-all-notifications">View All Notifications</a>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <span id="user-name"></span>
                         <span id="user-role" class="badge"></span>
                         <button id="logout-btn" class="btn btn-small">Logout</button>
@@ -261,7 +279,15 @@
                 <section id="messages-section" class="content-section">
                     <div class="messaging-container">
                         <div class="conversations-list">
-                            <h3>Conversations</h3>
+                            <div class="conversations-header">
+                                <h3>Messages</h3>
+                                <button class="btn btn-primary btn-small" id="new-conversation-btn">+ New</button>
+                            </div>
+                            
+                            <div class="conversation-search">
+                                <input type="text" id="conversation-search" placeholder="Search conversations...">
+                            </div>
+                            
                             <div id="conversations">
                                 <!-- Conversations will be loaded dynamically -->
                             </div>
@@ -270,10 +296,13 @@
                         <div class="message-view">
                             <div class="message-header">
                                 <h3 id="conversation-title">Select a conversation</h3>
+                                <div class="message-header-actions">
+                                    <button class="btn-icon" id="conversation-info">ℹ️</button>
+                                </div>
                             </div>
                             
                             <div class="messages-container" id="messages-container">
-                                <!-- Messages will be loaded dynamically -->
+                                <p class="empty-state">Select a conversation to start messaging</p>
                             </div>
                             
                             <div class="message-input">
@@ -282,6 +311,30 @@
                                     <button type="submit" class="btn btn-primary">Send</button>
                                 </form>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- New Conversation Modal -->
+                    <div id="new-conversation-modal" class="modal">
+                        <div class="modal-content">
+                            <span class="close" id="close-new-conversation">&times;</span>
+                            <h3>Start New Conversation</h3>
+                            <form id="new-conversation-form">
+                                <div class="form-group">
+                                    <label for="recipient-username">Recipient Username</label>
+                                    <input type="text" id="recipient-username" name="username" placeholder="Enter username..." required>
+                                    <small>Type the username of the person you want to message</small>
+                                </div>
+                                
+                                <div id="username-suggestions" class="suggestions-list"></div>
+                                
+                                <div class="form-group">
+                                    <label for="first-message">First Message</label>
+                                    <textarea id="first-message" name="message" rows="3" placeholder="Say hello..." required></textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Start Conversation</button>
+                            </form>
                         </div>
                     </div>
                 </section>

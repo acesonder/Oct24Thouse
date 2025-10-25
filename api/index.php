@@ -157,6 +157,11 @@ try {
         exit();
     }
     
+    if (strpos($endpoint, 'notifications') === 0) {
+        require_once __DIR__ . '/notifications.php';
+        exit();
+    }
+    
     // Endpoint not found
     sendResponse(['success' => false, 'message' => 'Endpoint not found'], 404);
     

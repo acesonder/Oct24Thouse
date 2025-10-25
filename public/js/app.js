@@ -322,6 +322,9 @@ function initDashboard() {
         userRole.textContent = currentUser.role;
     }
     
+    // Setup notifications
+    setupNotifications();
+    
     // Load initial data
     loadBedStats();
     loadAnnouncements();
@@ -584,6 +587,165 @@ async function apiRequest(endpoint, options = {}) {
         console.error('API request error:', error);
         throw error;
     }
+}
+
+// Notifications System
+let notificationPollInterval = null;
+let unreadNotificationCount = 0;
+
+function setupNotifications() {
+    const notificationBell = document.getElementById('notification-bell');
+    const notificationDropdown = document.getElementById('notification-dropdown');
+    
+    if (!notificationBell) return;
+    
+    // Toggle dropdown on click
+    notificationBell.addEventListener('click', function(e) {
+        e.stopPropagation();
+        notificationDropdown.classList.toggle('active');
+        
+        if (notificationDropdown.classList.contains('active')) {
+            loadNotifications();
+        }
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!notificationBell.contains(e.target)) {
+            notificationDropdown.classList.remove('active');
+        }
+    });
+    
+    // Mark all as read
+    document.getElementById('mark-all-read')?.addEventListener('click', markAllNotificationsRead);
+    
+    // Load initial notifications
+    loadNotifications();
+    
+    // Poll for new notifications every 30 seconds
+    notificationPollInterval = setInterval(loadNotifications, 30000);
+}
+
+async function loadNotifications() {
+    if (!authToken) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/notifications/list`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            displayNotifications(data.notifications || []);
+            updateNotificationBadge(data.unread_count || 0);
+        }
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+    }
+}
+
+function displayNotifications(notifications) {
+    const notificationList = document.getElementById('notification-list');
+    
+    if (!notificationList) return;
+    
+    if (notifications.length === 0) {
+        notificationList.innerHTML = '<p class="no-notifications">No new notifications</p>';
+        return;
+    }
+    
+    notificationList.innerHTML = '';
+    
+    notifications.forEach(notification => {
+        const item = document.createElement('div');
+        item.className = `notification-item ${notification.is_read ? '' : 'unread'}`;
+        item.dataset.id = notification.id;
+        
+        item.innerHTML = `
+            <div class="notification-title">${escapeHtml(notification.title)}</div>
+            <div class="notification-message">${escapeHtml(notification.message)}</div>
+            <div class="notification-time">${formatTimeAgo(notification.created_at)}</div>
+        `;
+        
+        item.addEventListener('click', () => handleNotificationClick(notification));
+        
+        notificationList.appendChild(item);
+    });
+}
+
+function updateNotificationBadge(count) {
+    unreadNotificationCount = count;
+    const badge = document.getElementById('notification-badge');
+    
+    if (badge) {
+        badge.textContent = count;
+        if (count > 0) {
+            badge.classList.add('active');
+        } else {
+            badge.classList.remove('active');
+        }
+    }
+}
+
+async function handleNotificationClick(notification) {
+    // Mark as read
+    if (!notification.is_read) {
+        try {
+            await fetch(`${API_BASE}/notifications/${notification.id}/read`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+            
+            // Reload notifications
+            loadNotifications();
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+        }
+    }
+    
+    // Handle notification action (navigate to related section)
+    if (notification.action_url) {
+        window.location.href = notification.action_url;
+    }
+}
+
+async function markAllNotificationsRead() {
+    try {
+        await fetch(`${API_BASE}/notifications/mark-all-read`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        loadNotifications();
+    } catch (error) {
+        console.error('Error marking all as read:', error);
+    }
+}
+
+function formatTimeAgo(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+    
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return Math.floor(seconds / 60) + ' minutes ago';
+    if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
+    if (seconds < 604800) return Math.floor(seconds / 86400) + ' days ago';
+    
+    return date.toLocaleDateString();
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Service Worker registration for PWA
