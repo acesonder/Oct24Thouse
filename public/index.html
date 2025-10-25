@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Transition House Cobourg - Shelter Management Platform">
     <title>Transition House Cobourg</title>
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
     <link rel="stylesheet" href="css/style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
@@ -42,15 +43,169 @@
             </div>
         </div>
 
+        <!-- Registration Screen -->
+        <div id="register-screen" class="screen">
+            <div class="login-container">
+                <div class="logo">
+                    <h1>Transition House</h1>
+                    <p>Create Your Account</p>
+                </div>
+                
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="reg-email">Email *</label>
+                        <input type="email" id="reg-email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reg-username">Username</label>
+                        <input type="text" id="reg-username" name="username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reg-first-name">First Name</label>
+                        <input type="text" id="reg-first-name" name="first_name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reg-last-name">Last Name</label>
+                        <input type="text" id="reg-last-name" name="last_name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reg-password">Password *</label>
+                        <input type="password" id="reg-password" name="password" required minlength="8">
+                        <small>Minimum 8 characters</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reg-password-confirm">Confirm Password *</label>
+                        <input type="password" id="reg-password-confirm" name="password_confirm" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reg-role">Role *</label>
+                        <select id="reg-role" name="role_id" required>
+                            <option value="">Select Role</option>
+                            <option value="1">Client</option>
+                            <option value="2">Staff</option>
+                            <option value="3">Peer</option>
+                            <option value="4">Partner</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Register</button>
+                    
+                    <div class="form-footer">
+                        <a href="#login">Back to Login</a>
+                    </div>
+                </form>
+                
+                <div id="register-message" class="message"></div>
+            </div>
+        </div>
+
+        <!-- Forgot Password Screen -->
+        <div id="forgot-screen" class="screen">
+            <div class="login-container">
+                <div class="logo">
+                    <h1>Transition House</h1>
+                    <p>Reset Your Password</p>
+                </div>
+                
+                <form id="forgot-form">
+                    <div class="form-group">
+                        <label for="forgot-email">Email Address</label>
+                        <input type="email" id="forgot-email" name="email" required>
+                        <small>We'll send you a password reset link</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Send Reset Link</button>
+                    
+                    <div class="form-footer">
+                        <a href="#login">Back to Login</a>
+                    </div>
+                </form>
+                
+                <div id="forgot-message" class="message"></div>
+            </div>
+        </div>
+
         <!-- Dashboard Screen -->
         <div id="dashboard-screen" class="screen">
             <header>
                 <div class="header-content">
                     <h2>Dashboard</h2>
                     <div class="user-info">
-                        <span id="user-name"></span>
+                        <!-- Notifications Bell -->
+                        <div class="notification-bell" id="notification-bell">
+                            <span class="bell-icon">🔔</span>
+                            <span class="notification-badge" id="notification-badge">0</span>
+                            <div class="notification-dropdown" id="notification-dropdown">
+                                <div class="notification-header">
+                                    <h3>Notifications</h3>
+                                    <button class="btn-link" id="mark-all-read">Mark all read</button>
+                                </div>
+                                <div class="notification-list" id="notification-list">
+                                    <p class="no-notifications">No new notifications</p>
+                                </div>
+                                <div class="notification-footer">
+                                    <a href="#" id="view-all-notifications">View All Notifications</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sound Toggle -->
+                        <button class="btn-icon" id="sound-toggle" title="Toggle sounds">
+                            <span id="sound-icon">🔊</span>
+                        </button>
+                        
+                        <!-- User Profile Dropdown -->
+                        <div class="user-profile-dropdown">
+                            <button class="user-profile-button" id="user-profile-button">
+                                <span class="user-avatar" id="user-avatar">👤</span>
+                                <span id="user-name"></span>
+                            </button>
+                            <div class="user-dropdown-menu" id="user-dropdown-menu">
+                                <div class="dropdown-user-info">
+                                    <div class="user-avatar-large">👤</div>
+                                    <div>
+                                        <div class="dropdown-user-name" id="dropdown-user-name"></div>
+                                        <div class="dropdown-user-email" id="dropdown-user-email"></div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <a href="#" class="dropdown-item" id="view-profile">
+                                    <span>👤</span> View Profile
+                                </a>
+                                <a href="#" class="dropdown-item" id="edit-profile">
+                                    <span>✏️</span> Edit Profile
+                                </a>
+                                <a href="#" class="dropdown-item" id="settings">
+                                    <span>⚙️</span> Settings
+                                </a>
+                                <a href="#" class="dropdown-item" id="theme-selector">
+                                    <span>🎨</span> Change Theme
+                                </a>
+                                <hr>
+                                <a href="#" class="dropdown-item" id="help">
+                                    <span>❓</span> Help & Support
+                                </a>
+                                <a href="about.html" class="dropdown-item">
+                                    <span>ℹ️</span> About
+                                </a>
+                            </div>
+                        </div>
+                        
                         <span id="user-role" class="badge"></span>
                         <button id="logout-btn" class="btn btn-small">Logout</button>
+                    </div>
+                </div>
+                
+                <!-- News Marquee -->
+                <div class="news-marquee" id="news-marquee">
+                    <div class="marquee-content" id="marquee-content">
+                        <span class="news-item">📢 Welcome to Transition House Management System</span>
                     </div>
                 </div>
                 
@@ -62,6 +217,7 @@
                     <button class="nav-btn" data-section="messages">Messages</button>
                     <button class="nav-btn" data-section="peers">Peers</button>
                     <button class="nav-btn" data-section="resources">Resources</button>
+                    <a href="about.html" class="nav-btn" style="border: none; color: #7f8c8d;">About</a>
                 </nav>
             </header>
 
@@ -173,7 +329,15 @@
                 <section id="messages-section" class="content-section">
                     <div class="messaging-container">
                         <div class="conversations-list">
-                            <h3>Conversations</h3>
+                            <div class="conversations-header">
+                                <h3>Messages</h3>
+                                <button class="btn btn-primary btn-small" id="new-conversation-btn">+ New</button>
+                            </div>
+                            
+                            <div class="conversation-search">
+                                <input type="text" id="conversation-search" placeholder="Search conversations...">
+                            </div>
+                            
                             <div id="conversations">
                                 <!-- Conversations will be loaded dynamically -->
                             </div>
@@ -182,10 +346,13 @@
                         <div class="message-view">
                             <div class="message-header">
                                 <h3 id="conversation-title">Select a conversation</h3>
+                                <div class="message-header-actions">
+                                    <button class="btn-icon" id="conversation-info">ℹ️</button>
+                                </div>
                             </div>
                             
                             <div class="messages-container" id="messages-container">
-                                <!-- Messages will be loaded dynamically -->
+                                <p class="empty-state">Select a conversation to start messaging</p>
                             </div>
                             
                             <div class="message-input">
@@ -194,6 +361,30 @@
                                     <button type="submit" class="btn btn-primary">Send</button>
                                 </form>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- New Conversation Modal -->
+                    <div id="new-conversation-modal" class="modal">
+                        <div class="modal-content">
+                            <span class="close" id="close-new-conversation">&times;</span>
+                            <h3>Start New Conversation</h3>
+                            <form id="new-conversation-form">
+                                <div class="form-group">
+                                    <label for="recipient-username">Recipient Username</label>
+                                    <input type="text" id="recipient-username" name="username" placeholder="Enter username..." required>
+                                    <small>Type the username of the person you want to message</small>
+                                </div>
+                                
+                                <div id="username-suggestions" class="suggestions-list"></div>
+                                
+                                <div class="form-group">
+                                    <label for="first-message">First Message</label>
+                                    <textarea id="first-message" name="message" rows="3" placeholder="Say hello..." required></textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Start Conversation</button>
+                            </form>
                         </div>
                     </div>
                 </section>
@@ -223,8 +414,46 @@
                 </section>
             </main>
         </div>
+        
+        <!-- Theme Selector Modal -->
+        <div id="theme-selector-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="close-theme-selector">&times;</span>
+                <h2>Choose Your Theme</h2>
+                
+                <div class="theme-mode-toggle">
+                    <button class="mode-btn active" data-mode="light">☀️ Light Mode</button>
+                    <button class="mode-btn" data-mode="dark">🌙 Dark Mode</button>
+                </div>
+                
+                <div class="theme-grid" id="theme-grid">
+                    <!-- Themes will be populated by JavaScript -->
+                </div>
+                
+                <div class="custom-colors-section">
+                    <h3>Custom Colors (Optional)</h3>
+                    <p style="font-size: 14px; color: #7f8c8d;">Customize your selected theme</p>
+                    <div class="color-pickers">
+                        <div class="color-picker-item">
+                            <label>Primary Color</label>
+                            <input type="color" id="custom-primary" class="color-picker">
+                        </div>
+                        <div class="color-picker-item">
+                            <label>Secondary Color</label>
+                            <input type="color" id="custom-secondary" class="color-picker">
+                        </div>
+                        <div class="color-picker-item">
+                            <label>Background</label>
+                            <input type="color" id="custom-background" class="color-picker">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <script src="js/themes.js"></script>
+    <script src="js/sounds.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

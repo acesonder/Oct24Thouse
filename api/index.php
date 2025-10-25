@@ -88,6 +88,17 @@ try {
         sendResponse($result, $result['success'] ? 200 : 401);
     }
     
+    if ($endpoint === 'auth/forgot-password' && $method === 'POST') {
+        $email = $input['email'] ?? null;
+        
+        if (!$email) {
+            sendResponse(['success' => false, 'message' => 'Email required'], 400);
+        }
+        
+        $result = $auth->forgotPassword($email);
+        sendResponse($result);
+    }
+    
     // Protected endpoints (authentication required)
     $user = requireAuth($auth, $token);
     
@@ -138,6 +149,16 @@ try {
     
     if (strpos($endpoint, 'analytics') === 0) {
         require_once __DIR__ . '/analytics.php';
+        exit();
+    }
+    
+    if (strpos($endpoint, 'setup') === 0) {
+        require_once __DIR__ . '/setup.php';
+        exit();
+    }
+    
+    if (strpos($endpoint, 'notifications') === 0) {
+        require_once __DIR__ . '/notifications.php';
         exit();
     }
     

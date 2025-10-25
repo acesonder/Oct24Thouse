@@ -33,30 +33,46 @@ if ($method === 'GET' && preg_match('/intake\/(\d+)/', $endpoint, $matches)) {
 
 // Create new intake
 if ($endpoint === 'intake/create' && $method === 'POST') {
-    $client_id = $input['client_id'] ?? $user->id;
-    $intake_data = $input['intake_data'] ?? [];
-    $housing_history = $input['housing_history'] ?? [];
-    $risk_assessment = $input['risk_assessment'] ?? [];
-    $supports = $input['supports'] ?? [];
-    $vulnerability_score = $input['vulnerability_score'] ?? null;
-    
-    $query = "INSERT INTO intakes (client_id, staff_id, intake_data, housing_history, risk_assessment, supports, vulnerability_score, status) 
-              VALUES (:client_id, :staff_id, :intake_data, :housing_history, :risk_assessment, :supports, :vulnerability_score, 'draft')";
-    
-    $stmt = $db->prepare($query);
-    $stmt->execute([
-        'client_id' => $client_id,
-        'staff_id' => $user->id,
-        'intake_data' => json_encode($intake_data),
-        'housing_history' => json_encode($housing_history),
-        'risk_assessment' => json_encode($risk_assessment),
-        'supports' => json_encode($supports),
-        'vulnerability_score' => $vulnerability_score
-    ]);
-    
-    $intake_id = $db->lastInsertId();
-    
-    sendResponse(['success' => true, 'intake_id' => $intake_id, 'message' => 'Intake created successfully'], 201);
+    try {
+        $client_id = $input['client_id'] ?? $user->id;
+        $intake_data = $input['intake_data'] ?? [];
+        $housing_history = $input['housing_history'] ?? [];
+        $risk_assessment = $input['risk_assessment'] ?? [];
+        $supports = $input['supports'] ?? [];
+        $vulnerability_score = $input['vulnerability_score'] ?? null;
+        
+        // Validation
+        if (!$client_id) {
+            sendResponse(['success' => false, 'message' => 'Client ID is required'], 400);
+        }
+        
+        $query = "INSERT INTO intakes (client_id, staff_id, intake_data, housing_history, risk_assessment, supports, vulnerability_score, status) 
+                  VALUES (:client_id, :staff_id, :intake_data, :housing_history, :risk_assessment, :supports, :vulnerability_score, 'draft')";
+        
+        $stmt = $db->prepare($query);
+        $stmt->execute([
+            'client_id' => $client_id,
+            'staff_id' => $user->id,
+            'intake_data' => json_encode($intake_data),
+            'housing_history' => json_encode($housing_history),
+            'risk_assessment' => json_encode($risk_assessment),
+            'supports' => json_encode($supports),
+            'vulnerability_score' => $vulnerability_score
+        ]);
+        
+        $intake_id = $db->lastInsertId();
+        
+        // Log to admin dashboard
+        error_log("Intake created: ID={$intake_id}, Client={$client_id}, Staff={$user->id}");
+        
+        sendResponse(['success' => true, 'intake_id' => $intake_id, 'message' => 'Intake created successfully'], 201);
+    } catch (PDOException $e) {
+        error_log("Intake creation error: " . $e->getMessage());
+        sendResponse(['success' => false, 'message' => 'Database error: Failed to create intake'], 500);
+    } catch (Exception $e) {
+        error_log("Intake creation error: " . $e->getMessage());
+        sendResponse(['success' => false, 'message' => 'An error occurred while creating intake'], 500);
+    }
 }
 
 // Update existing intake

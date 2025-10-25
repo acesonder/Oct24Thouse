@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Staff & Workers - Transition House Cobourg</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        .hero-staff {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 100px 20px;
+            text-align: center;
+        }
+        
+        .hero-staff h1 {
+            font-size: 42px;
+            margin-bottom: 20px;
+        }
+        
+        .hero-staff p {
+            font-size: 20px;
+            max-width: 800px;
+            margin: 0 auto 40px;
+        }
+        
+        .tools {
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .tools h2 {
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 50px;
+            color: #2c3e50;
+        }
+        
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        
+        .tool-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 4px solid #3498db;
+        }
+        
+        .tool-card h3 {
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        
+        .tool-card p {
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+        
+        .efficiency {
+            background: #f8f9fa;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        
+        .efficiency h2 {
+            font-size: 32px;
+            margin-bottom: 40px;
+            color: #2c3e50;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            flex-wrap: wrap;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+        
+        .btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <section class="hero-staff">
+        <h1>👨‍💼 Empower Your Work</h1>
+        <p>Streamline operations, coordinate care, and make data-driven decisions with our comprehensive platform</p>
+        <button class="btn btn-primary" onclick="window.location.href='index.html'">Access Dashboard</button>
+    </section>
+
+    <section class="tools">
+        <h2>Your Professional Tools</h2>
+        <div class="tool-grid">
+            <div class="tool-card">
+                <h3>⚡ Real-Time Dashboard</h3>
+                <p>Start your shift with instant access to bed occupancy, active intakes, and pending tasks.</p>
+            </div>
+            
+            <div class="tool-card">
+                <h3>📋 Digital Intake</h3>
+                <p>Process new intakes in 10 minutes with our trauma-informed digital forms and assessments.</p>
+            </div>
+            
+            <div class="tool-card">
+                <h3>🛏️ Bed Management</h3>
+                <p>Assign, release, and track bed status with real-time updates across your team.</p>
+            </div>
+            
+            <div class="tool-card">
+                <h3>📊 Case Management</h3>
+                <p>Create SMART goals, track client progress, and document all interactions securely.</p>
+            </div>
+            
+            <div class="tool-card">
+                <h3>🔗 Quick Referrals</h3>
+                <p>Connect clients to partner services with one-click referral system and tracking.</p>
+            </div>
+            
+            <div class="tool-card">
+                <h3>💬 Team Communication</h3>
+                <p>Coordinate with colleagues, share updates, and message clients through secure channels.</p>
+            </div>
+            
+            <div class="tool-card">
+                <h3>📈 Analytics & Reports</h3>
+                <p>Make data-driven decisions with occupancy trends, outcome metrics, and custom reports.</p>
+            </div>
+            
+            <div class="tool-card">
+                <h3>🔔 Smart Notifications</h3>
+                <p>Never miss a task with real-time alerts for appointments, critical updates, and urgent needs.</p>
+            </div>
+            
+            <div class="tool-card">
+                <h3>🔒 Audit Trail</h3>
+                <p>Full compliance tracking with detailed logs of all actions for PHIPA/PIPEDA requirements.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="efficiency">
+        <h2>Proven Efficiency Gains</h2>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">50%</div>
+                <div class="stat-label">Faster Intake Processing</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Digital Documentation</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Real-Time Access</div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 50px;">
+            <button class="btn btn-primary" onclick="window.location.href='index.html#register'">Get Started</button>
+        </div>
+    </section>
+
+    <footer style="background: #2c3e50; color: white; padding: 30px 20px; text-align: center;">
+        <p><a href="landing.html" style="color: #3498db; text-decoration: none;">← Back to Main Page</a></p>
+        <p style="margin-top: 15px;">&copy; 2024 Transition House Cobourg</p>
+    </footer>
+</body>
+</html>
