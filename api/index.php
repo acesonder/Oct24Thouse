@@ -152,6 +152,11 @@ try {
         exit();
     }
     
+    if (strpos($endpoint, 'setup') === 0) {
+        require_once __DIR__ . '/setup.php';
+        exit();
+    }
+    
     // Endpoint not found
     sendResponse(['success' => false, 'message' => 'Endpoint not found'], 404);
     
