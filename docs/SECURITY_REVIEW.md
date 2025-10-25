@@ -113,13 +113,15 @@ This document outlines the security measures implemented in the Transition House
 
 #### 2. Setup Page Password
 - **Issue**: Hardcoded password in code
-- **Severity**: Medium
-- **Current**: Password is `079777`
-- **Mitigation**:
-  - Move to environment variable
-  - Use stronger password
-  - Implement IP whitelist for setup page
-  - Disable setup page in production
+- **Severity**: HIGH - MUST BE FIXED BEFORE PRODUCTION
+- **Current**: Password is hardcoded (see source code)
+- **Immediate Actions Required**:
+  - Move password to environment variable (`SETUP_PASSWORD`)
+  - Use strong, randomly generated password (minimum 20 characters)
+  - Implement IP whitelist for setup page access
+  - Consider completely disabling setup page in production
+  - Add admin authentication instead of simple password
+- **Production Deployment Blocker**: YES
 
 #### 3. HTTPS Enforcement
 - **Issue**: No HTTPS enforcement
@@ -163,11 +165,12 @@ This document outlines the security measures implemented in the Transition House
 ## 🛡️ Security Best Practices Checklist
 
 ### Production Deployment
+- [ ] **CRITICAL: Secure setup page password** (currently hardcoded - MUST FIX)
 - [ ] Enable HTTPS with valid SSL/TLS certificate
 - [ ] Set secure environment variables
 - [ ] Disable error display (`display_errors = Off`)
 - [ ] Enable error logging to secure location
-- [ ] Remove or secure setup page
+- [ ] Remove or completely secure setup page
 - [ ] Implement rate limiting
 - [ ] Add security headers (CSP, HSTS, X-Frame-Options)
 - [ ] Configure CORS for specific origins only

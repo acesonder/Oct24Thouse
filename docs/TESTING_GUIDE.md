@@ -66,8 +66,9 @@ This document provides comprehensive testing procedures for all features and dat
 2. **Authentication**
    - Try wrong password
    - ✅ Expected: "Incorrect password" error
-   - Enter correct password: `079777`
+   - Enter correct password (configured in environment - contact admin)
    - ✅ Expected: Setup interface appears
+   - ⚠️ **Security Note**: Password must be changed from default before production use
 
 3. **Database Status Check**
    - Click "Check Database" button
@@ -274,7 +275,7 @@ This document provides comprehensive testing procedures for all features and dat
 
 ### Input Validation
 1. **SQL Injection**
-   - Try SQL injection in login: `' OR '1'='1`
+   - Try SQL injection patterns in login fields
    - ✅ Expected: Properly escaped, no injection
    
 2. **XSS Testing**

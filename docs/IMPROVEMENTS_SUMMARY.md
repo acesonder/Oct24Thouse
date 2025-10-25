@@ -44,7 +44,7 @@ This document summarizes all improvements made to the Transition House platform 
 **Status**: Complete
 
 **Features**:
-- Password-protected setup page (password: `079777`)
+- Password-protected setup page (password configured in environment)
 - Database status checking
 - One-click table reset
 - Demo data import (5 pre-configured accounts)
@@ -53,7 +53,7 @@ This document summarizes all improvements made to the Transition House platform 
 - System configuration management
 - API testing tools
 
-**Demo Accounts**:
+**Demo Accounts** (After importing demo data):
 - Client: client@demo.com / demo1234
 - Staff: staff@demo.com / demo1234
 - Peer: peer@demo.com / demo1234
@@ -61,6 +61,7 @@ This document summarizes all improvements made to the Transition House platform 
 - Admin: admin@demo.com / demo1234
 
 **Access**: `/setup.html`
+**⚠️ Security Note**: Setup page password MUST be changed before production deployment
 
 ---
 
