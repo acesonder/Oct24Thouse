@@ -328,10 +328,41 @@ function initDashboard() {
     // Setup messaging
     setupMessaging();
     
+    // Setup sound toggle
+    setupSoundToggle();
+    
     // Load initial data
     loadBedStats();
     loadAnnouncements();
     showSection('overview');
+}
+
+function setupSoundToggle() {
+    const soundToggle = document.getElementById('sound-toggle');
+    const soundIcon = document.getElementById('sound-icon');
+    
+    if (!soundToggle || !soundIcon) return;
+    
+    // Set initial state
+    updateSoundIcon();
+    
+    soundToggle.addEventListener('click', function() {
+        const isEnabled = window.notificationSounds.enabled;
+        window.notificationSounds.setEnabled(!isEnabled);
+        updateSoundIcon();
+        
+        // Play a test sound when enabling
+        if (!isEnabled) {
+            window.notificationSounds.playSuccessSound();
+        }
+    });
+}
+
+function updateSoundIcon() {
+    const soundIcon = document.getElementById('sound-icon');
+    if (soundIcon) {
+        soundIcon.textContent = window.notificationSounds.enabled ? '🔊' : '🔇';
+    }
 }
 
 function loadSectionData(sectionName) {
@@ -670,7 +701,16 @@ async function loadMessages(conversationId, silent = false) {
         const data = await response.json();
         
         if (data.success) {
-            displayMessages(data.messages || [], data.conversation || {});
+            const messages = data.messages || [];
+            const container = document.getElementById('messages-container');
+            const previousMessageCount = container ? container.querySelectorAll('.message').length : 0;
+            
+            displayMessages(messages, data.conversation || {});
+            
+            // Play sound if new messages arrived
+            if (silent && messages.length > previousMessageCount) {
+                window.notificationSounds?.playMessageSound();
+            }
         }
     } catch (error) {
         if (!silent) {
@@ -938,8 +978,14 @@ async function loadNotifications() {
         const data = await response.json();
         
         if (data.success) {
+            // Play sound if there are new unread notifications
+            const newUnreadCount = data.unread_count || 0;
+            if (newUnreadCount > unreadNotificationCount && unreadNotificationCount >= 0) {
+                window.notificationSounds?.playNotificationSound();
+            }
+            
             displayNotifications(data.notifications || []);
-            updateNotificationBadge(data.unread_count || 0);
+            updateNotificationBadge(newUnreadCount);
         }
     } catch (error) {
         console.error('Error loading notifications:', error);
