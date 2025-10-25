@@ -325,6 +325,9 @@ function initDashboard() {
     // Setup notifications
     setupNotifications();
     
+    // Setup messaging
+    setupMessaging();
+    
     // Load initial data
     loadBedStats();
     loadAnnouncements();
@@ -464,10 +467,306 @@ async function loadAnnouncements() {
 }
 
 // Conversations
+// Messaging
+let currentConversationId = null;
+let messagePolling = null;
+
+function setupMessaging() {
+    // New conversation button
+    document.getElementById('new-conversation-btn')?.addEventListener('click', showNewConversationModal);
+    
+    // Close modal
+    document.getElementById('close-new-conversation')?.addEventListener('click', hideNewConversationModal);
+    
+    // New conversation form
+    document.getElementById('new-conversation-form')?.addEventListener('submit', handleNewConversation);
+    
+    // Username search
+    document.getElementById('recipient-username')?.addEventListener('input', handleUsernameSearch);
+    
+    // Message form
+    document.getElementById('message-form')?.addEventListener('submit', handleSendMessage);
+    
+    // Conversation search
+    document.getElementById('conversation-search')?.addEventListener('input', handleConversationSearch);
+}
+
+function showNewConversationModal() {
+    const modal = document.getElementById('new-conversation-modal');
+    if (modal) {
+        modal.classList.add('active');
+    }
+}
+
+function hideNewConversationModal() {
+    const modal = document.getElementById('new-conversation-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.getElementById('new-conversation-form')?.reset();
+        document.getElementById('username-suggestions').innerHTML = '';
+    }
+}
+
+async function handleUsernameSearch(e) {
+    const query = e.target.value.trim();
+    
+    if (query.length < 2) {
+        document.getElementById('username-suggestions').innerHTML = '';
+        document.getElementById('username-suggestions').classList.remove('active');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/chat/search-users?q=${encodeURIComponent(query)}`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.users.length > 0) {
+            displayUserSuggestions(data.users);
+        } else {
+            document.getElementById('username-suggestions').innerHTML = '<div class="suggestion-item">No users found</div>';
+            document.getElementById('username-suggestions').classList.add('active');
+        }
+    } catch (error) {
+        console.error('Error searching users:', error);
+    }
+}
+
+function displayUserSuggestions(users) {
+    const suggestions = document.getElementById('username-suggestions');
+    
+    suggestions.innerHTML = users.map(user => `
+        <div class="suggestion-item" data-username="${escapeHtml(user.username)}">
+            <div class="suggestion-username">@${escapeHtml(user.username)}</div>
+            <div class="suggestion-name">${escapeHtml(user.first_name || '')} ${escapeHtml(user.last_name || '')}</div>
+        </div>
+    `).join('');
+    
+    suggestions.classList.add('active');
+    
+    // Add click handlers
+    suggestions.querySelectorAll('.suggestion-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.getElementById('recipient-username').value = this.dataset.username;
+            suggestions.innerHTML = '';
+            suggestions.classList.remove('active');
+        });
+    });
+}
+
+async function handleNewConversation(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('recipient-username').value.trim();
+    const message = document.getElementById('first-message').value.trim();
+    
+    if (!username || !message) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/chat/start-conversation`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ recipient_username: username, message })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            hideNewConversationModal();
+            loadConversations();
+            if (data.conversation_id) {
+                selectConversation(data.conversation_id);
+            }
+        } else {
+            alert(data.message || 'Failed to start conversation');
+        }
+    } catch (error) {
+        console.error('Error starting conversation:', error);
+        alert('An error occurred');
+    }
+}
+
 async function loadConversations() {
-    // For now, show placeholder
-    const conversations = document.getElementById('conversations');
-    conversations.innerHTML = '<p>No conversations yet</p>';
+    try {
+        const response = await fetch(`${API_BASE}/chat/conversations`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            displayConversations(data.conversations || []);
+        }
+    } catch (error) {
+        console.error('Error loading conversations:', error);
+    }
+}
+
+function displayConversations(conversations) {
+    const conversationsEl = document.getElementById('conversations');
+    
+    if (!conversationsEl) return;
+    
+    if (conversations.length === 0) {
+        conversationsEl.innerHTML = '<p style="padding: 20px; text-align: center; color: #999;">No conversations yet</p>';
+        return;
+    }
+    
+    conversationsEl.innerHTML = conversations.map(conv => `
+        <div class="conversation-item ${conv.id === currentConversationId ? 'active' : ''}" data-id="${conv.id}">
+            <div class="conversation-name">${escapeHtml(conv.other_user_name || 'Unknown User')}</div>
+            <div class="conversation-preview">${escapeHtml(conv.last_message || 'No messages yet')}</div>
+            <div class="conversation-time">${conv.last_message_time ? formatTimeAgo(conv.last_message_time) : ''}</div>
+            ${conv.unread_count > 0 ? `<div class="conversation-unread">${conv.unread_count}</div>` : ''}
+        </div>
+    `).join('');
+    
+    // Add click handlers
+    conversationsEl.querySelectorAll('.conversation-item').forEach(item => {
+        item.addEventListener('click', function() {
+            selectConversation(parseInt(this.dataset.id));
+        });
+    });
+}
+
+function selectConversation(conversationId) {
+    currentConversationId = conversationId;
+    
+    // Update active state
+    document.querySelectorAll('.conversation-item').forEach(item => {
+        item.classList.toggle('active', parseInt(item.dataset.id) === conversationId);
+    });
+    
+    // Load messages
+    loadMessages(conversationId);
+    
+    // Start polling for new messages
+    if (messagePolling) {
+        clearInterval(messagePolling);
+    }
+    messagePolling = setInterval(() => loadMessages(conversationId, true), 5000);
+}
+
+async function loadMessages(conversationId, silent = false) {
+    try {
+        const response = await fetch(`${API_BASE}/chat/messages/${conversationId}`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            displayMessages(data.messages || [], data.conversation || {});
+        }
+    } catch (error) {
+        if (!silent) {
+            console.error('Error loading messages:', error);
+        }
+    }
+}
+
+function displayMessages(messages, conversation) {
+    const container = document.getElementById('messages-container');
+    const title = document.getElementById('conversation-title');
+    
+    if (!container || !title) return;
+    
+    // Update header
+    title.textContent = conversation.other_user_name || 'Conversation';
+    
+    if (messages.length === 0) {
+        container.innerHTML = '<p class="empty-state">No messages yet. Start the conversation!</p>';
+        return;
+    }
+    
+    // Store current scroll position
+    const wasAtBottom = container.scrollHeight - container.scrollTop === container.clientHeight;
+    
+    container.innerHTML = messages.map(msg => {
+        const isSent = msg.sender_id === currentUser.id;
+        return `
+            <div class="message ${isSent ? 'sent' : 'received'}">
+                ${!isSent ? `<div class="message-sender">${escapeHtml(msg.sender_name || 'User')}</div>` : ''}
+                <div class="message-bubble">${escapeHtml(msg.content)}</div>
+                <div class="message-time">${formatTimeAgo(msg.created_at)}</div>
+            </div>
+        `;
+    }).join('');
+    
+    // Scroll to bottom if was at bottom before
+    if (wasAtBottom || messages.length > 0) {
+        container.scrollTop = container.scrollHeight;
+    }
+}
+
+async function handleSendMessage(e) {
+    e.preventDefault();
+    
+    if (!currentConversationId) {
+        alert('Please select a conversation first');
+        return;
+    }
+    
+    const input = document.getElementById('message-content');
+    const content = input.value.trim();
+    
+    if (!content) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/chat/send`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                conversation_id: currentConversationId,
+                content
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            input.value = '';
+            loadMessages(currentConversationId, true);
+        } else {
+            alert(data.message || 'Failed to send message');
+        }
+    } catch (error) {
+        console.error('Error sending message:', error);
+        alert('An error occurred');
+    }
+}
+
+function handleConversationSearch(e) {
+    const query = e.target.value.toLowerCase();
+    const items = document.querySelectorAll('.conversation-item');
+    
+    items.forEach(item => {
+        const name = item.querySelector('.conversation-name').textContent.toLowerCase();
+        const preview = item.querySelector('.conversation-preview').textContent.toLowerCase();
+        
+        if (name.includes(query) || preview.includes(query)) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
 }
 
 // Mentors
