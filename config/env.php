@@ -2,6 +2,10 @@
 /**
  * Simple .env file loader
  * Loads environment variables from .env file
+ * 
+ * Note: Only sets variables that are not already defined.
+ * Variables set to empty string ('') or '0' in the environment
+ * will NOT be overwritten by .env file values.
  */
 
 function loadEnv($path) {
@@ -11,6 +15,7 @@ function loadEnv($path) {
 
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     if ($lines === false) {
+        error_log("loadEnv: Failed to read .env file at $path");
         return false;
     }
     
