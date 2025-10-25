@@ -160,9 +160,52 @@
                             <span id="sound-icon">🔊</span>
                         </button>
                         
-                        <span id="user-name"></span>
+                        <!-- User Profile Dropdown -->
+                        <div class="user-profile-dropdown">
+                            <button class="user-profile-button" id="user-profile-button">
+                                <span class="user-avatar" id="user-avatar">👤</span>
+                                <span id="user-name"></span>
+                            </button>
+                            <div class="user-dropdown-menu" id="user-dropdown-menu">
+                                <div class="dropdown-user-info">
+                                    <div class="user-avatar-large">👤</div>
+                                    <div>
+                                        <div class="dropdown-user-name" id="dropdown-user-name"></div>
+                                        <div class="dropdown-user-email" id="dropdown-user-email"></div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <a href="#" class="dropdown-item" id="view-profile">
+                                    <span>👤</span> View Profile
+                                </a>
+                                <a href="#" class="dropdown-item" id="edit-profile">
+                                    <span>✏️</span> Edit Profile
+                                </a>
+                                <a href="#" class="dropdown-item" id="settings">
+                                    <span>⚙️</span> Settings
+                                </a>
+                                <a href="#" class="dropdown-item" id="theme-selector">
+                                    <span>🎨</span> Change Theme
+                                </a>
+                                <hr>
+                                <a href="#" class="dropdown-item" id="help">
+                                    <span>❓</span> Help & Support
+                                </a>
+                                <a href="about.html" class="dropdown-item">
+                                    <span>ℹ️</span> About
+                                </a>
+                            </div>
+                        </div>
+                        
                         <span id="user-role" class="badge"></span>
                         <button id="logout-btn" class="btn btn-small">Logout</button>
+                    </div>
+                </div>
+                
+                <!-- News Marquee -->
+                <div class="news-marquee" id="news-marquee">
+                    <div class="marquee-content" id="marquee-content">
+                        <span class="news-item">📢 Welcome to Transition House Management System</span>
                     </div>
                 </div>
                 
@@ -371,8 +414,45 @@
                 </section>
             </main>
         </div>
+        
+        <!-- Theme Selector Modal -->
+        <div id="theme-selector-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="close-theme-selector">&times;</span>
+                <h2>Choose Your Theme</h2>
+                
+                <div class="theme-mode-toggle">
+                    <button class="mode-btn active" data-mode="light">☀️ Light Mode</button>
+                    <button class="mode-btn" data-mode="dark">🌙 Dark Mode</button>
+                </div>
+                
+                <div class="theme-grid" id="theme-grid">
+                    <!-- Themes will be populated by JavaScript -->
+                </div>
+                
+                <div class="custom-colors-section">
+                    <h3>Custom Colors (Optional)</h3>
+                    <p style="font-size: 14px; color: #7f8c8d;">Customize your selected theme</p>
+                    <div class="color-pickers">
+                        <div class="color-picker-item">
+                            <label>Primary Color</label>
+                            <input type="color" id="custom-primary" class="color-picker">
+                        </div>
+                        <div class="color-picker-item">
+                            <label>Secondary Color</label>
+                            <input type="color" id="custom-secondary" class="color-picker">
+                        </div>
+                        <div class="color-picker-item">
+                            <label>Background</label>
+                            <input type="color" id="custom-background" class="color-picker">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <script src="js/themes.js"></script>
     <script src="js/sounds.js"></script>
     <script src="js/app.js"></script>
 </body>

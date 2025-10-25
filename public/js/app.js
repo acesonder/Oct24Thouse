@@ -316,10 +316,15 @@ function initDashboard() {
     // Set user info
     const userName = document.getElementById('user-name');
     const userRole = document.getElementById('user-role');
+    const dropdownUserName = document.getElementById('dropdown-user-name');
+    const dropdownUserEmail = document.getElementById('dropdown-user-email');
     
     if (currentUser) {
-        userName.textContent = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || currentUser.email;
+        const fullName = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || currentUser.email;
+        userName.textContent = fullName;
         userRole.textContent = currentUser.role;
+        dropdownUserName.textContent = fullName;
+        dropdownUserEmail.textContent = currentUser.email;
     }
     
     // Setup notifications
@@ -331,10 +336,115 @@ function initDashboard() {
     // Setup sound toggle
     setupSoundToggle();
     
+    // Setup user profile dropdown
+    setupUserProfileDropdown();
+    
+    // Setup news marquee
+    setupNewsMarquee();
+    
     // Load initial data
     loadBedStats();
     loadAnnouncements();
     showSection('overview');
+}
+
+function setupUserProfileDropdown() {
+    const profileButton = document.getElementById('user-profile-button');
+    const dropdownMenu = document.getElementById('user-dropdown-menu');
+    
+    if (!profileButton || !dropdownMenu) return;
+    
+    // Toggle dropdown
+    profileButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('active');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!profileButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.classList.remove('active');
+        }
+    });
+    
+    // Dropdown item handlers
+    document.getElementById('view-profile')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Profile view coming soon!');
+        dropdownMenu.classList.remove('active');
+    });
+    
+    document.getElementById('edit-profile')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Profile edit coming soon!');
+        dropdownMenu.classList.remove('active');
+    });
+    
+    document.getElementById('settings')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Settings coming soon!');
+        dropdownMenu.classList.remove('active');
+    });
+    
+    document.getElementById('theme-selector')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        showThemeSelector();
+        dropdownMenu.classList.remove('active');
+    });
+    
+    document.getElementById('help')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Help & Support: Please contact staff for assistance.');
+        dropdownMenu.classList.remove('active');
+    });
+}
+
+async function setupNewsMarquee() {
+    const marqueeContent = document.getElementById('marquee-content');
+    
+    if (!marqueeContent) return;
+    
+    try {
+        // Load news items from API
+        const response = await fetch(`${API_BASE}/announcements/list`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.announcements && data.announcements.length > 0) {
+            displayMarqueeNews(data.announcements);
+        } else {
+            // Default news items
+            displayMarqueeNews([
+                { content: '📢 Welcome to Transition House Management System' },
+                { content: '🏠 Check bed availability in real-time' },
+                { content: '💬 Connect with peer mentors for support' },
+                { content: '📊 Track your goals and progress' }
+            ]);
+        }
+    } catch (error) {
+        console.error('Error loading marquee news:', error);
+        // Use default news
+        displayMarqueeNews([
+            { content: '📢 Welcome to Transition House Management System' }
+        ]);
+    }
+}
+
+function displayMarqueeNews(newsItems) {
+    const marqueeContent = document.getElementById('marquee-content');
+    
+    if (!marqueeContent || newsItems.length === 0) return;
+    
+    // Duplicate news items for seamless loop
+    const duplicatedNews = [...newsItems, ...newsItems];
+    
+    marqueeContent.innerHTML = duplicatedNews.map(item => 
+        `<span class="news-item">${escapeHtml(item.content)}</span>`
+    ).join('');
 }
 
 function setupSoundToggle() {
@@ -927,6 +1037,87 @@ async function apiRequest(endpoint, options = {}) {
         throw error;
     }
 }
+
+function showThemeSelector() {
+    const modal = document.getElementById('theme-selector-modal');
+    if (!modal) return;
+    
+    modal.classList.add('active');
+    populateThemeGrid();
+    updateThemeMode();
+}
+
+function populateThemeGrid() {
+    const themeGrid = document.getElementById('theme-grid');
+    if (!themeGrid) return;
+    
+    const themes = window.themeManager.getAllThemes();
+    const currentTheme = window.themeManager.getCurrentTheme();
+    const currentMode = currentTheme.mode;
+    
+    themeGrid.innerHTML = themes.map(theme => {
+        const colors = theme[currentMode];
+        return `
+            <div class="theme-card ${theme.id === currentTheme.theme ? 'active' : ''}" data-theme="${theme.id}">
+                <div class="theme-preview">
+                    <div class="theme-color-dot" style="background: ${colors.primary}"></div>
+                    <div class="theme-color-dot" style="background: ${colors.secondary}"></div>
+                </div>
+                <div class="theme-name">${theme.name}</div>
+            </div>
+        `;
+    }).join('');
+    
+    // Add click handlers
+    themeGrid.querySelectorAll('.theme-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const themeName = this.dataset.theme;
+            window.themeManager.setTheme(themeName);
+            
+            // Update active state
+            themeGrid.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+}
+
+function updateThemeMode() {
+    const modeButtons = document.querySelectorAll('.mode-btn');
+    const currentMode = window.themeManager.getCurrentTheme().mode;
+    
+    modeButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === currentMode);
+        
+        btn.addEventListener('click', function() {
+            window.themeManager.toggleMode();
+            
+            // Update UI
+            modeButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Repopulate themes with new mode
+            populateThemeGrid();
+        });
+    });
+}
+
+// Close theme selector
+document.getElementById('close-theme-selector')?.addEventListener('click', function() {
+    document.getElementById('theme-selector-modal')?.classList.remove('active');
+});
+
+// Custom color pickers
+document.getElementById('custom-primary')?.addEventListener('change', function(e) {
+    window.themeManager.setCustomColor('primary-color', e.target.value);
+});
+
+document.getElementById('custom-secondary')?.addEventListener('change', function(e) {
+    window.themeManager.setCustomColor('secondary-color', e.target.value);
+});
+
+document.getElementById('custom-background')?.addEventListener('change', function(e) {
+    window.themeManager.setCustomColor('background-color', e.target.value);
+});
 
 // Notifications System
 let notificationPollInterval = null;
