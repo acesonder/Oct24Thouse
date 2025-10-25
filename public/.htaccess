@@ -9,7 +9,7 @@
     # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     
     # Handle API requests
-    RewriteRule ^api/(.*)$ api/index.php [L,QSA]
+    RewriteRule ^api/(.*)$ ../api/index.php [L,QSA]
     
     # Handle front-end routing
     RewriteCond %{REQUEST_FILENAME} !-f
