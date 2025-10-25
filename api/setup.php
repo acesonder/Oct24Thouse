@@ -213,8 +213,8 @@ if ($endpoint === 'setup/import-demo' && $method === 'POST') {
             $checkStmt->execute(['bed_number' => "BED-{$i}"]);
             
             if ($checkStmt->rowCount() == 0) {
-                $insertQuery = "INSERT INTO beds (bed_number, room_number, floor, status) 
-                               VALUES (:bed_number, :room_number, :floor, 'available')";
+                $insertQuery = "INSERT INTO beds (bed_number, room, status) 
+                               VALUES (:bed_number, :room, 'available')";
                 
                 $floor = ceil($i / 10);
                 $room = (($i - 1) % 5) + 1;
@@ -222,8 +222,7 @@ if ($endpoint === 'setup/import-demo' && $method === 'POST') {
                 $insertStmt = $db->prepare($insertQuery);
                 $insertStmt->execute([
                     'bed_number' => "BED-{$i}",
-                    'room_number' => "R{$floor}{$room}",
-                    'floor' => $floor
+                    'room' => "R{$floor}{$room}"
                 ]);
                 $bedsCreated++;
             }
