@@ -87,3 +87,7 @@ if ($endpoint === 'analytics/export' && $method === 'GET') {
     // This would generate export files
     sendResponse(['success' => true, 'message' => 'Export functionality coming soon']);
 }
+
+// If no endpoint matched, return error
+error_log("Analytics API: Unknown endpoint - $endpoint with method $method");
+sendResponse(['success' => false, 'message' => 'Analytics endpoint not found: ' . $endpoint], 404);

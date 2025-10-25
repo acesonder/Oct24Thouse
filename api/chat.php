@@ -431,3 +431,7 @@ if ($endpoint === 'chat/send' && $method === 'POST') {
         sendResponse(['success' => false, 'message' => 'Failed to send message'], 500);
     }
 }
+
+// If no endpoint matched, return error
+error_log("Chat API: Unknown endpoint - $endpoint with method $method");
+sendResponse(['success' => false, 'message' => 'Chat endpoint not found: ' . $endpoint], 404);

@@ -138,3 +138,7 @@ function createNotification($db, $userId, $title, $message, $type = 'info', $act
         return false;
     }
 }
+
+// If no endpoint matched, return error
+error_log("Notifications API: Unknown endpoint - $endpoint with method $method");
+sendResponse(['success' => false, 'message' => 'Notifications endpoint not found: ' . $endpoint], 404);

@@ -7,19 +7,38 @@
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Setup-Password');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
+// Enable error logging
+error_reporting(E_ALL);
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
+// Load environment variables
+require_once __DIR__ . '/../config/env.php';
+
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/auth.php';
 
-$database = new Database();
-$db = $database->getConnection();
-$auth = new Auth($db);
+try {
+    $database = new Database();
+    $db = $database->getConnection();
+    $auth = new Auth($db);
+} catch (Exception $e) {
+    error_log("API: Failed to initialize database - " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Database initialization failed. Please check configuration.',
+        'error' => $e->getMessage()
+    ]);
+    exit();
+}
 
 // Get request method and endpoint
 $method = $_SERVER['REQUEST_METHOD'];
@@ -29,6 +48,8 @@ $base_path = '/api';
 // Remove base path and query string
 $endpoint = str_replace($base_path, '', parse_url($request_uri, PHP_URL_PATH));
 $endpoint = trim($endpoint, '/');
+
+error_log("API: Request - Method: $method, Endpoint: $endpoint");
 
 // Get request body
 $input = json_decode(file_get_contents('php://input'), true);
@@ -99,6 +120,12 @@ try {
         sendResponse($result);
     }
     
+    // Setup endpoints (protected by setup password, not user authentication)
+    if (strpos($endpoint, 'setup') === 0) {
+        require_once __DIR__ . '/setup.php';
+        exit();
+    }
+    
     // Protected endpoints (authentication required)
     $user = requireAuth($auth, $token);
     
@@ -152,11 +179,6 @@ try {
         exit();
     }
     
-    if (strpos($endpoint, 'setup') === 0) {
-        require_once __DIR__ . '/setup.php';
-        exit();
-    }
-    
     if (strpos($endpoint, 'notifications') === 0) {
         require_once __DIR__ . '/notifications.php';
         exit();
@@ -166,6 +188,7 @@ try {
     sendResponse(['success' => false, 'message' => 'Endpoint not found'], 404);
     
 } catch (Exception $e) {
-    error_log("API Error: " . $e->getMessage());
-    sendResponse(['success' => false, 'message' => 'Internal server error'], 500);
+    error_log("API Error: Endpoint=$endpoint, Method=$method, Error=" . $e->getMessage());
+    error_log("API Error Stack Trace: " . $e->getTraceAsString());
+    sendResponse(['success' => false, 'message' => 'Internal server error', 'error' => $e->getMessage()], 500);
 }

@@ -164,3 +164,7 @@ if ($endpoint === 'intake/list' && $method === 'GET') {
     
     sendResponse(['success' => true, 'intakes' => $intakes, 'page' => $page]);
 }
+
+// If no endpoint matched, return error
+error_log("Intake API: Unknown endpoint - $endpoint with method $method");
+sendResponse(['success' => false, 'message' => 'Intake endpoint not found: ' . $endpoint], 404);

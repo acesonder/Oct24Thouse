@@ -31,10 +31,15 @@ class Database {
                 PDO::ATTR_EMULATE_PREPARES => false,
             ];
             
+            error_log("Database: Attempting connection to " . $this->host . " as " . $this->username);
+            
             $this->conn = new PDO($dsn, $this->username, $this->password, $options);
+            
+            error_log("Database: Connection successful to database " . $this->db_name);
         } catch(PDOException $exception) {
-            error_log("Connection error: " . $exception->getMessage());
-            throw new Exception("Database connection failed");
+            error_log("Database: Connection error - " . $exception->getMessage());
+            error_log("Database: Host=" . $this->host . ", DB=" . $this->db_name . ", User=" . $this->username);
+            throw new Exception("Database connection failed: " . $exception->getMessage());
         }
 
         return $this->conn;
