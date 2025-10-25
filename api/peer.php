@@ -124,3 +124,7 @@ if ($endpoint === 'peer/mentors' && $method === 'GET') {
     
     sendResponse(['success' => true, 'mentors' => $mentors]);
 }
+
+// If no endpoint matched, return error
+error_log("Peer API: Unknown endpoint - $endpoint with method $method");
+sendResponse(['success' => false, 'message' => 'Peer endpoint not found: ' . $endpoint], 404);

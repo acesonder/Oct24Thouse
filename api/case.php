@@ -149,3 +149,7 @@ if ($endpoint === 'case/list' && $method === 'GET') {
     
     sendResponse(['success' => true, 'case_plans' => $case_plans]);
 }
+
+// If no endpoint matched, return error
+error_log("Case API: Unknown endpoint - $endpoint with method $method");
+sendResponse(['success' => false, 'message' => 'Case endpoint not found: ' . $endpoint], 404);

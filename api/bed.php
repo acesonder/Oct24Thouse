@@ -136,3 +136,7 @@ if ($endpoint === 'bed/stats' && $method === 'GET') {
     
     sendResponse(['success' => true, 'stats' => $stats]);
 }
+
+// If no endpoint matched, return error
+error_log("Bed API: Unknown endpoint - $endpoint with method $method");
+sendResponse(['success' => false, 'message' => 'Bed endpoint not found: ' . $endpoint], 404);

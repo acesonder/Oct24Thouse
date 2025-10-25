@@ -110,3 +110,7 @@ if ($endpoint === 'referral/list' && $method === 'GET') {
     
     sendResponse(['success' => true, 'referrals' => $referrals]);
 }
+
+// If no endpoint matched, return error
+error_log("Referral API: Unknown endpoint - $endpoint with method $method");
+sendResponse(['success' => false, 'message' => 'Referral endpoint not found: ' . $endpoint], 404);

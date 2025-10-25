@@ -82,3 +82,7 @@ if ($endpoint === 'training/my-completions' && $method === 'GET') {
     
     sendResponse(['success' => true, 'completions' => $completions]);
 }
+
+// If no endpoint matched, return error
+error_log("Training API: Unknown endpoint - $endpoint with method $method");
+sendResponse(['success' => false, 'message' => 'Training endpoint not found: ' . $endpoint], 404);
