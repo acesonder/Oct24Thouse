@@ -10,6 +10,10 @@ function loadEnv($path) {
     }
 
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if ($lines === false) {
+        return false;
+    }
+    
     foreach ($lines as $line) {
         // Skip comments
         if (strpos(trim($line), '#') === 0) {
@@ -28,7 +32,7 @@ function loadEnv($path) {
             }
 
             // Set environment variable if not already set
-            if (!getenv($name)) {
+            if (getenv($name) === false) {
                 putenv("$name=$value");
                 $_ENV[$name] = $value;
                 $_SERVER[$name] = $value;
