@@ -28,6 +28,18 @@ function setupEventListeners() {
         loginForm.addEventListener('submit', handleLogin);
     }
     
+    // Register form
+    const registerForm = document.getElementById('register-form');
+    if (registerForm) {
+        registerForm.addEventListener('submit', handleRegister);
+    }
+    
+    // Forgot password form
+    const forgotForm = document.getElementById('forgot-form');
+    if (forgotForm) {
+        forgotForm.addEventListener('submit', handleForgotPassword);
+    }
+    
     // Logout button
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
@@ -48,14 +60,49 @@ function setupEventListeners() {
     if (refreshBedsBtn) {
         refreshBedsBtn.addEventListener('click', loadBeds);
     }
+    
+    // Hash navigation for login/register/forgot
+    window.addEventListener('hashchange', handleHashNavigation);
+    handleHashNavigation(); // Handle initial hash
+}
+
+// Handle hash navigation
+function handleHashNavigation() {
+    const hash = window.location.hash.substring(1); // Remove the #
+    
+    if (!authToken) { // Only handle these hashes when not logged in
+        switch(hash) {
+            case 'register':
+                showScreen('register-screen');
+                break;
+            case 'forgot':
+                showScreen('forgot-screen');
+                break;
+            case 'login':
+            case '':
+                showScreen('login-screen');
+                break;
+        }
+    }
 }
 
 // Authentication
 async function handleLogin(e) {
     e.preventDefault();
     
-    const email = document.getElementById('email').value;
+    const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
+    
+    // Validate fields
+    if (!email) {
+        showMessage('login-message', 'Please enter your email address', 'error');
+        return;
+    }
+    
+    if (!password) {
+        showMessage('login-message', 'Please enter your password', 'error');
+        return;
+    }
     
     try {
         const response = await fetch(`${API_BASE}/auth/login`, {
@@ -80,11 +127,109 @@ async function handleLogin(e) {
                 initDashboard();
             }, 500);
         } else {
-            showMessage('login-message', data.message || 'Login failed', 'error');
+            showMessage('login-message', data.message || 'Invalid email or password', 'error');
         }
     } catch (error) {
         console.error('Login error:', error);
-        showMessage('login-message', 'An error occurred during login', 'error');
+        showMessage('login-message', 'Network error. Please check your connection.', 'error');
+    }
+}
+
+// Registration handler
+async function handleRegister(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('reg-email').value;
+    const username = document.getElementById('reg-username').value;
+    const firstName = document.getElementById('reg-first-name').value;
+    const lastName = document.getElementById('reg-last-name').value;
+    const password = document.getElementById('reg-password').value;
+    const passwordConfirm = document.getElementById('reg-password-confirm').value;
+    const roleId = document.getElementById('reg-role').value;
+    
+    // Validate required fields
+    if (!email || !password || !roleId) {
+        showMessage('register-message', 'Please fill out all required fields', 'error');
+        return;
+    }
+    
+    // Validate password match
+    if (password !== passwordConfirm) {
+        showMessage('register-message', 'Passwords do not match', 'error');
+        return;
+    }
+    
+    // Validate password strength
+    if (password.length < 8) {
+        showMessage('register-message', 'Password must be at least 8 characters', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email,
+                username,
+                first_name: firstName,
+                last_name: lastName,
+                password,
+                role_id: roleId
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showMessage('register-message', 'Registration successful! Redirecting to login...', 'success');
+            
+            setTimeout(() => {
+                window.location.hash = 'login';
+                document.getElementById('register-form').reset();
+            }, 1500);
+        } else {
+            showMessage('register-message', data.message || 'Registration failed', 'error');
+        }
+    } catch (error) {
+        console.error('Registration error:', error);
+        showMessage('register-message', 'Network error. Please check your connection.', 'error');
+    }
+}
+
+// Forgot password handler
+async function handleForgotPassword(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('forgot-email').value;
+    
+    if (!email) {
+        showMessage('forgot-message', 'Please enter your email address', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/auth/forgot-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showMessage('forgot-message', 'Password reset link sent to your email!', 'success');
+            document.getElementById('forgot-form').reset();
+        } else {
+            showMessage('forgot-message', data.message || 'Failed to send reset link', 'error');
+        }
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        showMessage('forgot-message', 'Network error. Please check your connection.', 'error');
     }
 }
 

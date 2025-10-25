@@ -217,6 +217,57 @@ class Auth {
         
         return ['success' => true, 'message' => 'Logged out successfully'];
     }
+    
+    /**
+     * Initiate password reset
+     */
+    public function forgotPassword($email) {
+        // Validate email
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return ['success' => false, 'message' => 'Invalid email format'];
+        }
+        
+        // Check if user exists
+        $query = "SELECT id, email, first_name FROM users WHERE email = :email AND is_active = 1";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['email' => $email]);
+        
+        if ($stmt->rowCount() == 0) {
+            // Don't reveal if email exists for security
+            return ['success' => true, 'message' => 'If the email exists, a reset link has been sent'];
+        }
+        
+        $user = $stmt->fetch();
+        
+        // Generate reset token
+        $reset_token = bin2hex(random_bytes(32));
+        $reset_hash = hash('sha256', $reset_token);
+        $expires_at = date('Y-m-d H:i:s', time() + 3600); // 1 hour
+        
+        // Store reset token
+        $query = "INSERT INTO password_resets (user_id, token_hash, expires_at) 
+                  VALUES (:user_id, :token_hash, :expires_at)";
+        
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([
+                'user_id' => $user['id'],
+                'token_hash' => $reset_hash,
+                'expires_at' => $expires_at
+            ]);
+            
+            // In production, send email here
+            // For now, log the reset token (remove in production)
+            error_log("Password reset token for {$email}: {$reset_token}");
+            
+            $this->logAudit($user['id'], 'password_reset_requested', 'users', $user['id'], null, ['email' => $email]);
+            
+            return ['success' => true, 'message' => 'Password reset link sent to your email'];
+        } catch (PDOException $e) {
+            error_log("Password reset error: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Failed to process password reset'];
+        }
+    }
 
     /**
      * Log audit trail
