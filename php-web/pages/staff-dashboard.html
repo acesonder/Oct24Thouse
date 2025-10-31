@@ -1,0 +1,232 @@
+<div class="staff-dashboard">
+    <h2>Staff Shift Dashboard</h2>
+    
+    <!-- Real-time Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" id="beds-available">--</div>
+            <div class="stat-label">Beds Available</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value" id="beds-occupied">--</div>
+            <div class="stat-label">Beds Occupied</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value" id="pending-intakes">--</div>
+            <div class="stat-label">Pending Intakes</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value" id="active-incidents">--</div>
+            <div class="stat-label">Active Incidents</div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="card">
+        <h3>Quick Actions</h3>
+        <div class="grid grid-4">
+            <button class="btn btn-primary" onclick="navigateTo('intake-management')">📝 New Intake</button>
+            <button class="btn btn-primary" onclick="navigateTo('bed-management')">🛏️ Manage Beds</button>
+            <button class="btn btn-primary" onclick="navigateTo('case-management')">📋 Case Plans</button>
+            <button class="btn btn-primary" onclick="navigateTo('referrals')">🔄 Send Referral</button>
+            <button class="btn btn-secondary" onclick="navigateTo('incidents')">⚠️ Log Incident</button>
+            <button class="btn btn-secondary" onclick="navigateTo('inventory')">📦 Inventory</button>
+            <button class="btn btn-secondary" onclick="navigateTo('reports')">📊 Reports</button>
+            <button class="btn btn-secondary" onclick="navigateTo('client-directory')">👥 Client Directory</button>
+        </div>
+    </div>
+    
+    <!-- Today's Tasks & Alerts -->
+    <div class="grid grid-2">
+        <div class="card">
+            <h3>🔔 Today's Alerts</h3>
+            <div id="todays-alerts">
+                <p>Loading alerts...</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>📅 Scheduled Activities</h3>
+            <div id="scheduled-activities">
+                <p>Loading activities...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Admissions & Departures -->
+    <div class="grid grid-2">
+        <div class="card">
+            <h3>Recent Admissions (Last 7 Days)</h3>
+            <div id="recent-admissions">
+                <p>Loading...</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>Upcoming Departures</h3>
+            <div id="upcoming-departures">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bed Occupancy Visual -->
+    <div class="card">
+        <h3>Bed Occupancy Overview</h3>
+        <div id="bed-occupancy-chart">
+            <canvas id="occupancy-chart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+function init_staff_dashboard() {
+    loadStaffDashboard();
+    
+    // Refresh every 30 seconds
+    setInterval(loadStaffDashboard, 30000);
+}
+
+async function loadStaffDashboard() {
+    try {
+        const result = await Auth.apiCall('staff/dashboard');
+        
+        if (result.success) {
+            // Update bed stats
+            if (result.bed_stats) {
+                document.getElementById('beds-available').textContent = result.bed_stats.available || 0;
+                document.getElementById('beds-occupied').textContent = result.bed_stats.occupied || 0;
+            }
+            
+            // Update other stats
+            if (result.stats) {
+                document.getElementById('pending-intakes').textContent = result.stats.pending_intakes || 0;
+                document.getElementById('active-incidents').textContent = result.stats.active_incidents || 0;
+            }
+            
+            // Load alerts
+            if (result.alerts) {
+                displayAlerts(result.alerts);
+            }
+            
+            // Load admissions
+            if (result.recent_admissions) {
+                displayAdmissions(result.recent_admissions);
+            }
+            
+            // Load departures
+            if (result.upcoming_departures) {
+                displayDepartures(result.upcoming_departures);
+            }
+        }
+    } catch (error) {
+        console.error('Error loading staff dashboard:', error);
+    }
+}
+
+function displayAlerts(alerts) {
+    const container = document.getElementById('todays-alerts');
+    
+    if (!alerts || alerts.length === 0) {
+        container.innerHTML = '<p class="text-muted">No alerts today</p>';
+        return;
+    }
+    
+    let html = '<div class="alerts-list">';
+    alerts.forEach(alert => {
+        const severity = alert.severity || 'info';
+        html += `
+            <div class="alert alert-${severity}">
+                <strong>${alert.title}</strong>
+                <p>${alert.message}</p>
+                <small>${App.formatDate(alert.created_at)}</small>
+            </div>
+        `;
+    });
+    html += '</div>';
+    
+    container.innerHTML = html;
+}
+
+function displayAdmissions(admissions) {
+    const container = document.getElementById('recent-admissions');
+    
+    if (!admissions || admissions.length === 0) {
+        container.innerHTML = '<p>No recent admissions</p>';
+        return;
+    }
+    
+    let html = '<table class="table"><tbody>';
+    admissions.forEach(admission => {
+        html += `
+            <tr>
+                <td>${admission.client_name}</td>
+                <td>Bed ${admission.bed_number}</td>
+                <td>${App.formatDate(admission.admission_date)}</td>
+            </tr>
+        `;
+    });
+    html += '</tbody></table>';
+    
+    container.innerHTML = html;
+}
+
+function displayDepartures(departures) {
+    const container = document.getElementById('upcoming-departures');
+    
+    if (!departures || departures.length === 0) {
+        container.innerHTML = '<p>No scheduled departures</p>';
+        return;
+    }
+    
+    let html = '<table class="table"><tbody>';
+    departures.forEach(departure => {
+        html += `
+            <tr>
+                <td>${departure.client_name}</td>
+                <td>Bed ${departure.bed_number}</td>
+                <td>${new Date(departure.expected_exit).toLocaleDateString()}</td>
+            </tr>
+        `;
+    });
+    html += '</tbody></table>';
+    
+    container.innerHTML = html;
+}
+</script>
+
+<style>
+.alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.alert {
+    padding: 12px;
+    border-radius: 4px;
+    border-left: 4px solid;
+}
+
+.alert-info {
+    background: #d1ecf1;
+    border-color: #0c5460;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    border-color: #856404;
+}
+
+.alert-danger {
+    background: #f8d7da;
+    border-color: #721c24;
+}
+
+.text-muted {
+    color: #6c757d;
+}
+</style>

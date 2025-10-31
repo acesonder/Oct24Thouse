@@ -1,0 +1,371 @@
+<div class="goals-page">
+    <h2>My Goals</h2>
+    
+    <div class="card">
+        <div class="goals-header">
+            <h3>Goal Tracking</h3>
+            <button class="btn btn-primary" onclick="showNewGoalModal()">+ New Goal</button>
+        </div>
+        
+        <div class="goals-stats">
+            <div class="stat">
+                <div class="stat-value" id="total-goals">0</div>
+                <div class="stat-label">Total Goals</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="active-goals">0</div>
+                <div class="stat-label">Active</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="completed-goals">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="goal-completion-rate">0%</div>
+                <div class="stat-label">Completion Rate</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Goals List -->
+    <div id="goals-container">
+        <p>Loading goals...</p>
+    </div>
+</div>
+
+<!-- New Goal Modal -->
+<div id="new-goal-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Create New Goal</h3>
+            <button class="btn-close" onclick="closeModal('new-goal-modal')">×</button>
+        </div>
+        <div class="modal-body">
+            <form id="new-goal-form">
+                <div class="form-group">
+                    <label>Goal Category *</label>
+                    <select name="category" class="form-control" required>
+                        <option value="">Select Category</option>
+                        <option value="housing">Housing</option>
+                        <option value="employment">Employment</option>
+                        <option value="education">Education</option>
+                        <option value="health">Health & Wellness</option>
+                        <option value="financial">Financial</option>
+                        <option value="life-skills">Life Skills</option>
+                        <option value="relationships">Relationships</option>
+                        <option value="legal">Legal</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Goal Title *</label>
+                    <input type="text" name="title" class="form-control" placeholder="What do you want to achieve?" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" class="form-control" rows="3" placeholder="Describe your goal in detail"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Target Date</label>
+                        <input type="date" name="target_date" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select name="priority" class="form-control">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Initial Tasks (one per line)</label>
+                    <textarea name="tasks" class="form-control" rows="4" placeholder="Break down your goal into tasks..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Create Goal</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('new-goal-modal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function init_goals() {
+    loadGoals();
+    
+    document.getElementById('new-goal-form').addEventListener('submit', createGoal);
+}
+
+async function loadGoals() {
+    try {
+        const result = await Auth.apiCall('goals/list');
+        
+        if (result.success) {
+            updateGoalStats(result.stats);
+            displayGoals(result.goals);
+        }
+    } catch (error) {
+        console.error('Error loading goals:', error);
+    }
+}
+
+function updateGoalStats(stats) {
+    if (!stats) return;
+    
+    document.getElementById('total-goals').textContent = stats.total || 0;
+    document.getElementById('active-goals').textContent = stats.active || 0;
+    document.getElementById('completed-goals').textContent = stats.completed || 0;
+    document.getElementById('goal-completion-rate').textContent = 
+        (stats.completion_rate || 0) + '%';
+}
+
+function displayGoals(goals) {
+    const container = document.getElementById('goals-container');
+    
+    if (!goals || goals.length === 0) {
+        container.innerHTML = `
+            <div class="card">
+                <p>No goals yet. Click "New Goal" to get started!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    goals.forEach(goal => {
+        const priorityClass = goal.priority || 'medium';
+        const statusClass = goal.status || 'active';
+        const progress = goal.completion_percentage || 0;
+        
+        html += `
+            <div class="card goal-card">
+                <div class="goal-header">
+                    <div>
+                        <span class="goal-category">${goal.category}</span>
+                        <span class="goal-priority ${priorityClass}">${goal.priority}</span>
+                        <h3>${goal.title}</h3>
+                    </div>
+                    <div class="goal-actions">
+                        <button class="btn btn-sm btn-secondary" onclick="editGoal(${goal.id})">Edit</button>
+                        <button class="btn btn-sm btn-success" onclick="viewGoalDetails(${goal.id})">Details</button>
+                    </div>
+                </div>
+                
+                ${goal.description ? `<p class="goal-description">${goal.description}</p>` : ''}
+                
+                <div class="goal-progress">
+                    <div class="progress-header">
+                        <span>Progress</span>
+                        <span>${progress}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                </div>
+                
+                <div class="goal-meta">
+                    ${goal.target_date ? `<span>📅 Target: ${new Date(goal.target_date).toLocaleDateString()}</span>` : ''}
+                    <span>✅ ${goal.completed_tasks || 0}/${goal.total_tasks || 0} tasks</span>
+                    <span>Created: ${new Date(goal.created_at).toLocaleDateString()}</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+async function createGoal(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    
+    // Parse tasks
+    if (data.tasks) {
+        data.tasks = data.tasks.split('\n').filter(t => t.trim()).map(t => t.trim());
+    }
+    
+    try {
+        const result = await Auth.apiCall('goals/create', data, 'POST');
+        
+        if (result.success) {
+            closeModal('new-goal-modal');
+            loadGoals();
+            alert('Goal created successfully!');
+        } else {
+            alert('Error creating goal: ' + result.message);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
+function showNewGoalModal() {
+    document.getElementById('new-goal-modal').classList.remove('hidden');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+}
+
+function editGoal(goalId) {
+    alert('Edit goal ' + goalId);
+}
+
+function viewGoalDetails(goalId) {
+    alert('View goal details ' + goalId);
+}
+</script>
+
+<style>
+.goals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.goals-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.goals-stats .stat {
+    text-align: center;
+    padding: 15px;
+    background: var(--light-bg);
+    border-radius: 4px;
+}
+
+.goals-stats .stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--secondary-color);
+}
+
+.goal-card {
+    margin-bottom: 20px;
+}
+
+.goal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.goal-category {
+    display: inline-block;
+    padding: 4px 8px;
+    background: var(--secondary-color);
+    color: white;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-right: 8px;
+}
+
+.goal-priority {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.goal-priority.high { background: #e74c3c; color: white; }
+.goal-priority.medium { background: #f39c12; color: white; }
+.goal-priority.low { background: #95a5a6; color: white; }
+
+.goal-description {
+    color: #7f8c8d;
+    margin-bottom: 15px;
+}
+
+.goal-progress {
+    margin: 15px 0;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.progress-bar {
+    height: 12px;
+    background: #ecf0f1;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--success-color);
+    transition: width 0.3s;
+}
+
+.goal-meta {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: #7f8c8d;
+    margin-top: 15px;
+}
+
+.goal-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+</style>

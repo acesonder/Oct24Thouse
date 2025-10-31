@@ -1,0 +1,410 @@
+<div class="messages-page">
+    <h2>Messages</h2>
+    
+    <div class="messages-container">
+        <!-- Conversations List -->
+        <div class="conversations-panel">
+            <div class="panel-header">
+                <h3>Conversations</h3>
+                <button class="btn btn-sm btn-primary" onclick="newMessage()">+ New</button>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" id="search-conversations" class="form-control" placeholder="Search conversations...">
+            </div>
+            
+            <div id="conversations-list" class="conversations-list">
+                <p>Loading conversations...</p>
+            </div>
+        </div>
+        
+        <!-- Message Thread -->
+        <div class="message-thread">
+            <div id="thread-header" class="thread-header hidden">
+                <div class="thread-info">
+                    <h3 id="thread-name">Select a conversation</h3>
+                    <span id="thread-status"></span>
+                </div>
+                <button class="btn btn-sm btn-secondary" onclick="archiveThread()">Archive</button>
+            </div>
+            
+            <div id="messages-display" class="messages-display">
+                <div class="empty-state">
+                    <p>💬</p>
+                    <p>Select a conversation to view messages</p>
+                </div>
+            </div>
+            
+            <div id="message-input" class="message-input hidden">
+                <form id="send-message-form">
+                    <textarea id="message-text" class="form-control" rows="3" placeholder="Type your message..."></textarea>
+                    <div class="input-actions">
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="attachFile()">📎 Attach</button>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentThreadId = null;
+
+function init_messages() {
+    loadConversations();
+    
+    document.getElementById('send-message-form').addEventListener('submit', sendMessage);
+    document.getElementById('search-conversations').addEventListener('input', searchConversations);
+    
+    // Poll for new messages every 10 seconds
+    setInterval(checkNewMessages, 10000);
+}
+
+async function loadConversations() {
+    try {
+        const result = await Auth.apiCall('messages/conversations');
+        
+        if (result.success && result.conversations) {
+            displayConversations(result.conversations);
+        }
+    } catch (error) {
+        console.error('Error loading conversations:', error);
+    }
+}
+
+function displayConversations(conversations) {
+    const container = document.getElementById('conversations-list');
+    
+    if (!conversations || conversations.length === 0) {
+        container.innerHTML = '<p class="empty">No conversations yet</p>';
+        return;
+    }
+    
+    let html = '';
+    conversations.forEach(conv => {
+        const unreadClass = conv.unread_count > 0 ? 'unread' : '';
+        const activeClass = conv.id === currentThreadId ? 'active' : '';
+        
+        html += `
+            <div class="conversation-item ${unreadClass} ${activeClass}" onclick="loadThread(${conv.id})">
+                <div class="conv-avatar">${conv.participant_initials || '👤'}</div>
+                <div class="conv-info">
+                    <div class="conv-name">${conv.participant_name}</div>
+                    <div class="conv-preview">${conv.last_message || 'No messages'}</div>
+                </div>
+                <div class="conv-meta">
+                    <div class="conv-time">${App.formatDate(conv.last_message_time)}</div>
+                    ${conv.unread_count > 0 ? `<div class="unread-badge">${conv.unread_count}</div>` : ''}
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+async function loadThread(threadId) {
+    currentThreadId = threadId;
+    
+    try {
+        const result = await Auth.apiCall('messages/thread', { thread_id: threadId });
+        
+        if (result.success) {
+            displayThread(result.thread, result.messages);
+        }
+    } catch (error) {
+        console.error('Error loading thread:', error);
+    }
+}
+
+function displayThread(thread, messages) {
+    // Update header
+    document.getElementById('thread-header').classList.remove('hidden');
+    document.getElementById('thread-name').textContent = thread.participant_name;
+    document.getElementById('thread-status').textContent = thread.participant_role;
+    
+    // Display messages
+    const display = document.getElementById('messages-display');
+    
+    if (!messages || messages.length === 0) {
+        display.innerHTML = '<p class="empty">No messages in this conversation</p>';
+    } else {
+        let html = '';
+        messages.forEach(msg => {
+            const isOwn = msg.is_own_message;
+            html += `
+                <div class="message ${isOwn ? 'own' : 'other'}">
+                    <div class="message-bubble">
+                        <div class="message-text">${msg.message}</div>
+                        <div class="message-time">${App.formatDate(msg.created_at)}</div>
+                    </div>
+                </div>
+            `;
+        });
+        display.innerHTML = html;
+        
+        // Scroll to bottom
+        display.scrollTop = display.scrollHeight;
+    }
+    
+    // Show input
+    document.getElementById('message-input').classList.remove('hidden');
+}
+
+async function sendMessage(e) {
+    e.preventDefault();
+    
+    const messageText = document.getElementById('message-text').value.trim();
+    if (!messageText || !currentThreadId) return;
+    
+    try {
+        const result = await Auth.apiCall('messages/send', {
+            thread_id: currentThreadId,
+            message: messageText
+        }, 'POST');
+        
+        if (result.success) {
+            document.getElementById('message-text').value = '';
+            loadThread(currentThreadId);
+            loadConversations(); // Refresh list
+        }
+    } catch (error) {
+        alert('Error sending message: ' + error.message);
+    }
+}
+
+function newMessage() {
+    alert('New message feature - select recipient');
+}
+
+function archiveThread() {
+    if (confirm('Archive this conversation?')) {
+        alert('Archive feature coming soon');
+    }
+}
+
+function attachFile() {
+    alert('File attachment feature coming soon');
+}
+
+function searchConversations(e) {
+    const query = e.target.value.toLowerCase();
+    const items = document.querySelectorAll('.conversation-item');
+    
+    items.forEach(item => {
+        const name = item.querySelector('.conv-name').textContent.toLowerCase();
+        if (name.includes(query)) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+async function checkNewMessages() {
+    if (currentThreadId) {
+        loadThread(currentThreadId);
+    }
+}
+</script>
+
+<style>
+.messages-container {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 0;
+    height: calc(100vh - 150px);
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.conversations-panel {
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-box {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.conversations-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.conversation-item {
+    display: flex;
+    gap: 10px;
+    padding: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s;
+}
+
+.conversation-item:hover {
+    background: var(--light-bg);
+}
+
+.conversation-item.active {
+    background: #e3f2fd;
+}
+
+.conversation-item.unread {
+    background: #fff9e6;
+}
+
+.conv-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--secondary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.conv-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.conv-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.conv-preview {
+    font-size: 13px;
+    color: #7f8c8d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.conv-meta {
+    text-align: right;
+}
+
+.conv-time {
+    font-size: 12px;
+    color: #95a5a6;
+}
+
+.unread-badge {
+    background: var(--secondary-color);
+    color: white;
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.message-thread {
+    display: flex;
+    flex-direction: column;
+}
+
+.thread-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.thread-info h3 {
+    margin: 0;
+}
+
+.messages-display {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.empty-state {
+    text-align: center;
+    color: #95a5a6;
+    padding: 50px 20px;
+}
+
+.empty-state p:first-child {
+    font-size: 48px;
+}
+
+.message {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.message.own {
+    justify-content: flex-end;
+}
+
+.message-bubble {
+    max-width: 70%;
+    padding: 10px 15px;
+    border-radius: 12px;
+}
+
+.message.own .message-bubble {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.message.other .message-bubble {
+    background: var(--light-bg);
+}
+
+.message-text {
+    margin-bottom: 5px;
+}
+
+.message-time {
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+.message-input {
+    padding: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.input-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .messages-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .conversations-panel {
+        display: none;
+    }
+    
+    .message-thread.active .conversations-panel {
+        display: flex;
+    }
+}
+</style>
