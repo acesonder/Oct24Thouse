@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transition House - Server Setup & Configuration</title>
+    <link rel="stylesheet" href="assets/css/setup.css">
+</head>
+<body>
+    <!-- Password Lock Screen -->
+    <div id="lock-screen" class="lock-screen">
+        <div class="lock-container">
+            <div class="lock-header">
+                <h1>🔒 Server Setup Portal</h1>
+                <p>Enter password to access configuration</p>
+            </div>
+            
+            <form id="unlock-form" class="lock-form">
+                <div class="form-group">
+                    <label for="setup-password">Password</label>
+                    <input type="password" id="setup-password" class="form-control" required autofocus>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Unlock</button>
+                <div id="lock-message" class="message"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Setup Interface -->
+    <div id="setup-interface" class="setup-interface hidden">
+        <!-- Header -->
+        <header class="setup-header">
+            <div class="header-content">
+                <h1 id="site-title">🏠 Transition House - Setup Portal</h1>
+                <div class="header-actions">
+                    <button id="lock-btn" class="btn btn-secondary">🔒 Lock</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="setup-nav">
+            <button class="nav-tab active" data-tab="database">Database</button>
+            <button class="nav-tab" data-tab="accounts">Accounts</button>
+            <button class="nav-tab" data-tab="profiles">Profiles</button>
+            <button class="nav-tab" data-tab="branding">Branding</button>
+            <button class="nav-tab" data-tab="demo">Demo Content</button>
+            <button class="nav-tab" data-tab="backups">Backups</button>
+            <button class="nav-tab" data-tab="logs">Error Logs</button>
+            <button class="nav-tab" data-tab="diagnostics">Diagnostics</button>
+            <button class="nav-tab" data-tab="reset">Reset Tools</button>
+        </nav>
+
+        <!-- Content Container -->
+        <main class="setup-content">
+            
+            <!-- Database Configuration Tab -->
+            <section id="tab-database" class="tab-content active">
+                <h2>📊 Database Configuration</h2>
+                
+                <div class="card">
+                    <h3>Configure Database</h3>
+                    <form id="db-config-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="db-name">Database Name *</label>
+                                <input type="text" id="db-name" class="form-control" placeholder="transition_house" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="db-profile">Profile Name *</label>
+                                <input type="text" id="db-profile" class="form-control" placeholder="default" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="db-host">Host</label>
+                                <input type="text" id="db-host" class="form-control" value="localhost">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="db-port">Port</label>
+                                <input type="number" id="db-port" class="form-control" value="3306">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="db-user">Username</label>
+                                <input type="text" id="db-user" class="form-control" value="root">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="db-password">Password</label>
+                                <input type="password" id="db-password" class="form-control">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="db-overwrite">
+                                Overwrite existing database (WARNING: Deletes all data)
+                            </label>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="db-create-tables" checked>
+                                Create database tables from schema
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Configure Database</button>
+                        <button type="button" id="test-connection" class="btn btn-secondary">Test Connection</button>
+                    </form>
+                    
+                    <div id="db-message" class="message"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>Database Statistics</h3>
+                    <div id="db-stats-container">
+                        <button id="refresh-stats" class="btn btn-secondary">Refresh Stats</button>
+                        <div id="db-stats" class="stats-display"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Accounts Management Tab -->
+            <section id="tab-accounts" class="tab-content">
+                <h2>👥 Account Management</h2>
+                
+                <div class="card">
+                    <h3>Create New Account</h3>
+                    <form id="create-account-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="acc-email">Email *</label>
+                                <input type="email" id="acc-email" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="acc-username">Username *</label>
+                                <input type="text" id="acc-username" class="form-control" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="acc-firstname">First Name *</label>
+                                <input type="text" id="acc-firstname" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="acc-lastname">Last Name *</label>
+                                <input type="text" id="acc-lastname" class="form-control" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="acc-password">Password *</label>
+                                <input type="password" id="acc-password" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="acc-role">Role *</label>
+                                <select id="acc-role" class="form-control" required>
+                                    <option value="1">Client</option>
+                                    <option value="2">Staff</option>
+                                    <option value="3">Peer</option>
+                                    <option value="4">Partner</option>
+                                    <option value="5">Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Create Account</button>
+                    </form>
+                    
+                    <div id="create-account-message" class="message"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>Existing Accounts</h3>
+                    <button id="refresh-accounts" class="btn btn-secondary">Refresh</button>
+                    <div id="accounts-list" class="accounts-list"></div>
+                </div>
+            </section>
+
+            <!-- Configuration Profiles Tab -->
+            <section id="tab-profiles" class="tab-content">
+                <h2>⚙️ Configuration Profiles</h2>
+                
+                <div class="card">
+                    <h3>Saved Profiles</h3>
+                    <p>Manage multiple database configurations</p>
+                    <button id="refresh-profiles" class="btn btn-secondary">Refresh Profiles</button>
+                    <div id="profiles-list" class="profiles-list"></div>
+                </div>
+            </section>
+
+            <!-- Branding Tab -->
+            <section id="tab-branding" class="tab-content">
+                <h2>🎨 Site Branding</h2>
+                
+                <div class="card">
+                    <h3>Customize Appearance</h3>
+                    <form id="branding-form">
+                        <div class="form-group">
+                            <label for="site-name">Site Name</label>
+                            <input type="text" id="site-name" class="form-control" placeholder="Transition House">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="site-logo">Site Logo URL</label>
+                            <input type="text" id="site-logo" class="form-control" placeholder="/assets/images/logo.png">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="primary-color">Primary Color</label>
+                                <input type="color" id="primary-color" class="form-control-color" value="#2c3e50">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="secondary-color">Secondary Color</label>
+                                <input type="color" id="secondary-color" class="form-control-color" value="#3498db">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="site-theme">Theme</label>
+                            <select id="site-theme" class="form-control">
+                                <option value="default">Default</option>
+                                <option value="dark">Dark</option>
+                                <option value="light">Light</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Save Branding</button>
+                    </form>
+                    
+                    <div id="branding-message" class="message"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>Preview</h3>
+                    <div id="branding-preview" class="branding-preview">
+                        <div class="preview-header" id="preview-header">
+                            <span id="preview-site-name">Transition House</span>
+                        </div>
+                        <p>This is how your branding will appear</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Demo Content Tab -->
+            <section id="tab-demo" class="tab-content">
+                <h2>🎭 Demo Content & User Switching</h2>
+                
+                <div class="card">
+                    <h3>Import Demo Data</h3>
+                    <p>Quickly populate the database with test data</p>
+                    <button id="import-demo-btn" class="btn btn-primary">Import Demo Content</button>
+                    <div id="demo-message" class="message"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>Quick User Switching</h3>
+                    <p>Login as different demo users for testing</p>
+                    <div class="demo-accounts-grid">
+                        <div class="demo-account-card">
+                            <h4>👤 Client</h4>
+                            <p>Email: <code>client@demo.com</code></p>
+                            <p>Password: <code>demo1234</code></p>
+                            <button onclick="quickLogin('client@demo.com', 'demo1234')" class="btn btn-secondary btn-sm">Login</button>
+                        </div>
+                        
+                        <div class="demo-account-card">
+                            <h4>👨‍💼 Staff</h4>
+                            <p>Email: <code>staff@demo.com</code></p>
+                            <p>Password: <code>demo1234</code></p>
+                            <button onclick="quickLogin('staff@demo.com', 'demo1234')" class="btn btn-secondary btn-sm">Login</button>
+                        </div>
+                        
+                        <div class="demo-account-card">
+                            <h4>🤝 Peer</h4>
+                            <p>Email: <code>peer@demo.com</code></p>
+                            <p>Password: <code>demo1234</code></p>
+                            <button onclick="quickLogin('peer@demo.com', 'demo1234')" class="btn btn-secondary btn-sm">Login</button>
+                        </div>
+                        
+                        <div class="demo-account-card">
+                            <h4>🏢 Partner</h4>
+                            <p>Email: <code>partner@demo.com</code></p>
+                            <p>Password: <code>demo1234</code></p>
+                            <button onclick="quickLogin('partner@demo.com', 'demo1234')" class="btn btn-secondary btn-sm">Login</button>
+                        </div>
+                        
+                        <div class="demo-account-card">
+                            <h4>⚙️ Admin</h4>
+                            <p>Email: <code>admin@demo.com</code></p>
+                            <p>Password: <code>demo1234</code></p>
+                            <button onclick="quickLogin('admin@demo.com', 'demo1234')" class="btn btn-secondary btn-sm">Login</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Backups & Restore Tab -->
+            <section id="tab-backups" class="tab-content">
+                <h2>💾 Backup & Restore</h2>
+                
+                <div class="card">
+                    <h3>Create Backup</h3>
+                    <p>Backup your database to a .sql file</p>
+                    <button id="create-backup-btn" class="btn btn-primary">Create Backup Now</button>
+                    <div id="backup-message" class="message"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>Available Backups</h3>
+                    <button id="refresh-backups" class="btn btn-secondary">Refresh</button>
+                    <div id="backups-list" class="backups-list"></div>
+                </div>
+            </section>
+
+            <!-- Error Logs Tab -->
+            <section id="tab-logs" class="tab-content">
+                <h2>📋 Server Error Logs</h2>
+                
+                <div class="card">
+                    <h3>Recent Errors</h3>
+                    <div class="log-controls">
+                        <button id="refresh-logs" class="btn btn-secondary">Refresh</button>
+                        <select id="log-lines" class="form-control-inline">
+                            <option value="50">Last 50 lines</option>
+                            <option value="100" selected>Last 100 lines</option>
+                            <option value="200">Last 200 lines</option>
+                            <option value="500">Last 500 lines</option>
+                        </select>
+                    </div>
+                    <pre id="error-logs" class="error-logs">Loading...</pre>
+                </div>
+            </section>
+
+            <!-- Diagnostics Tab -->
+            <section id="tab-diagnostics" class="tab-content">
+                <h2>🔍 System Diagnostics</h2>
+                
+                <div class="card">
+                    <h3>Run Diagnostics</h3>
+                    <p>Check system health and requirements</p>
+                    <button id="run-diagnostics" class="btn btn-primary">Run Full Diagnostic</button>
+                    <div id="diagnostics-results" class="diagnostics-results"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>Troubleshooting Tools</h3>
+                    <div class="tools-grid">
+                        <button id="clear-cache-btn" class="btn btn-secondary">Clear Cache</button>
+                        <button id="rebuild-index-btn" class="btn btn-secondary">Rebuild Database Index</button>
+                        <button id="check-permissions-btn" class="btn btn-secondary">Check File Permissions</button>
+                        <button id="verify-schema-btn" class="btn btn-secondary">Verify Database Schema</button>
+                    </div>
+                    <div id="tools-message" class="message"></div>
+                </div>
+            </section>
+
+            <!-- Reset Tools Tab -->
+            <section id="tab-reset" class="tab-content">
+                <h2>⚠️ Reset & System Tools</h2>
+                
+                <div class="card danger">
+                    <h3>⚠️ Danger Zone</h3>
+                    <p class="warning">These actions are irreversible. Use with caution!</p>
+                    
+                    <div class="reset-actions">
+                        <div class="reset-action">
+                            <h4>Reset All Tables</h4>
+                            <p>Delete all data and recreate tables</p>
+                            <button id="reset-tables-btn" class="btn btn-danger">Reset Tables</button>
+                        </div>
+                        
+                        <div class="reset-action">
+                            <h4>Clear All Data</h4>
+                            <p>Delete all records but keep tables</p>
+                            <button id="clear-data-btn" class="btn btn-danger">Clear All Data</button>
+                        </div>
+                        
+                        <div class="reset-action">
+                            <h4>Factory Reset</h4>
+                            <p>Complete system reset to default state</p>
+                            <button id="factory-reset-btn" class="btn btn-danger">Factory Reset</button>
+                        </div>
+                    </div>
+                    
+                    <div id="reset-message" class="message"></div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="assets/js/setup.js"></script>
+</body>
+</html>
