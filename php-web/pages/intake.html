@@ -1,0 +1,245 @@
+<div class="intake-form">
+    <h2>Client Intake Form</h2>
+    
+    <div class="card">
+        <p class="info-text">Please complete all sections of this intake form. All information is confidential and protected.</p>
+        
+        <form id="intake-form">
+            <!-- Personal Information -->
+            <h3>Personal Information</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name *</label>
+                    <input type="text" name="first_name" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Last Name *</label>
+                    <input type="text" name="last_name" class="form-control" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Date of Birth *</label>
+                    <input type="date" name="dob" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select name="gender" class="form-control">
+                        <option value="">Prefer not to say</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="non-binary">Non-binary</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" name="phone" class="form-control">
+            </div>
+            
+            <!-- Emergency Contact -->
+            <h3>Emergency Contact</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Contact Name</label>
+                    <input type="text" name="emergency_name" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Contact Phone</label>
+                    <input type="tel" name="emergency_phone" class="form-control">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Relationship</label>
+                <input type="text" name="emergency_relationship" class="form-control">
+            </div>
+            
+            <!-- Housing Situation -->
+            <h3>Current Housing Situation</h3>
+            <div class="form-group">
+                <label>Where did you sleep last night?</label>
+                <select name="last_night" class="form-control">
+                    <option value="">Select...</option>
+                    <option value="street">Street/Outdoors</option>
+                    <option value="vehicle">Vehicle</option>
+                    <option value="shelter">Emergency Shelter</option>
+                    <option value="friend">Friend/Family (Temporary)</option>
+                    <option value="hotel">Hotel/Motel</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>How long have you been without permanent housing?</label>
+                <select name="homeless_duration" class="form-control">
+                    <option value="">Select...</option>
+                    <option value="1-week">Less than 1 week</option>
+                    <option value="1-month">1 week to 1 month</option>
+                    <option value="3-months">1-3 months</option>
+                    <option value="6-months">3-6 months</option>
+                    <option value="1-year">6-12 months</option>
+                    <option value="over-year">Over 1 year</option>
+                </select>
+            </div>
+            
+            <!-- Needs Assessment -->
+            <h3>Immediate Needs</h3>
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="needs[]" value="shelter">
+                    Emergency Shelter
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="needs[]" value="food">
+                    Food/Meal
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="needs[]" value="clothing">
+                    Clothing
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="needs[]" value="medical">
+                    Medical Care
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="needs[]" value="mental-health">
+                    Mental Health Support
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="needs[]" value="addiction">
+                    Addiction Services
+                </label>
+            </div>
+            
+            <!-- Additional Information -->
+            <h3>Additional Information</h3>
+            <div class="form-group">
+                <label>Is there anything else we should know to better serve you?</label>
+                <textarea name="additional_info" class="form-control" rows="4"></textarea>
+            </div>
+            
+            <!-- Consent -->
+            <h3>Consent</h3>
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="consent_services" required>
+                    I consent to receive services from Transition House
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="consent_privacy">
+                    I have read and understand the privacy policy
+                </label>
+            </div>
+            
+            <!-- Submit -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Submit Intake Form</button>
+                <button type="button" class="btn btn-secondary" onclick="saveDraft()">Save as Draft</button>
+            </div>
+        </form>
+        
+        <div id="intake-message" class="message"></div>
+    </div>
+</div>
+
+<script>
+function init_intake() {
+    document.getElementById('intake-form').addEventListener('submit', submitIntake);
+}
+
+async function submitIntake(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    
+    // Convert checkboxes to array
+    data.needs = formData.getAll('needs[]');
+    
+    try {
+        const result = await Auth.apiCall('intake/create', data, 'POST');
+        
+        if (result.success) {
+            showMessage('intake-message', 'Intake form submitted successfully!', 'success');
+            setTimeout(() => {
+                navigateTo('dashboard');
+            }, 2000);
+        } else {
+            showMessage('intake-message', 'Error: ' + result.message, 'error');
+        }
+    } catch (error) {
+        showMessage('intake-message', 'Error submitting form: ' + error.message, 'error');
+    }
+}
+
+async function saveDraft() {
+    const formData = new FormData(document.getElementById('intake-form'));
+    const data = Object.fromEntries(formData);
+    
+    try {
+        const result = await Auth.apiCall('intake/save-draft', data, 'POST');
+        
+        if (result.success) {
+            showMessage('intake-message', 'Draft saved successfully', 'success');
+        } else {
+            showMessage('intake-message', 'Error saving draft', 'error');
+        }
+    } catch (error) {
+        showMessage('intake-message', 'Error: ' + error.message, 'error');
+    }
+}
+
+function showMessage(id, message, type) {
+    const el = document.getElementById(id);
+    el.textContent = message;
+    el.className = `message ${type}`;
+}
+</script>
+
+<style>
+.info-text {
+    background: #d1ecf1;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.form-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 10px;
+}
+
+.intake-form h3 {
+    color: var(--primary-color);
+    margin-top: 30px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--secondary-color);
+}
+</style>
