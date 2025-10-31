@@ -1,0 +1,398 @@
+<div class="bed-management">
+    <h2>Bed Management</h2>
+    
+    <!-- Filter Controls -->
+    <div class="card">
+        <h3>Filters</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Status</label>
+                <select id="filter-status" class="form-control">
+                    <option value="all">All Beds</option>
+                    <option value="available">Available</option>
+                    <option value="occupied">Occupied</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="reserved">Reserved</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Room</label>
+                <select id="filter-room" class="form-control">
+                    <option value="all">All Rooms</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Type</label>
+                <select id="filter-type" class="form-control">
+                    <option value="all">All Types</option>
+                    <option value="emergency">Emergency</option>
+                    <option value="transitional">Transitional</option>
+                    <option value="family">Family</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn btn-secondary" onclick="applyFilters()">Apply Filters</button>
+        <button class="btn btn-primary" onclick="showAssignBedModal()">Assign Bed</button>
+    </div>
+    
+    <!-- Bed Grid Visual -->
+    <div class="card">
+        <h3>Bed Layout</h3>
+        <div id="bed-grid" class="bed-grid">
+            <p>Loading beds...</p>
+        </div>
+    </div>
+    
+    <!-- Bed List Table -->
+    <div class="card">
+        <h3>Bed Details</h3>
+        <div class="table-container">
+            <table class="table" id="beds-table">
+                <thead>
+                    <tr>
+                        <th>Bed #</th>
+                        <th>Room</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Occupant</th>
+                        <th>Check-in</th>
+                        <th>Expected Exit</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="beds-tbody">
+                    <tr><td colspan="8">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Bed Modal -->
+<div id="assign-bed-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Assign Bed</h3>
+            <button class="btn-close" onclick="closeModal('assign-bed-modal')">×</button>
+        </div>
+        <div class="modal-body">
+            <form id="assign-bed-form">
+                <div class="form-group">
+                    <label>Select Bed</label>
+                    <select id="bed-select" class="form-control" required>
+                        <option value="">-- Select Available Bed --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Client</label>
+                    <select id="client-select" class="form-control" required>
+                        <option value="">-- Select Client --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Check-in Date</label>
+                    <input type="date" id="checkin-date" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Expected Exit Date</label>
+                    <input type="date" id="exit-date" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="assignment-notes" class="form-control" rows="3"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Assign Bed</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('assign-bed-modal')">Cancel</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function init_bed_management() {
+    loadBeds();
+    loadAvailableBeds();
+    loadClients();
+    
+    // Set default check-in date to today
+    document.getElementById('checkin-date').valueAsDate = new Date();
+    
+    // Form submission
+    document.getElementById('assign-bed-form').addEventListener('submit', assignBed);
+}
+
+async function loadBeds() {
+    try {
+        const result = await Auth.apiCall('bed/list');
+        
+        if (result.success && result.beds) {
+            displayBedGrid(result.beds);
+            displayBedTable(result.beds);
+        }
+    } catch (error) {
+        console.error('Error loading beds:', error);
+    }
+}
+
+function displayBedGrid(beds) {
+    const container = document.getElementById('bed-grid');
+    
+    let html = '';
+    beds.forEach(bed => {
+        const statusClass = bed.status.toLowerCase();
+        html += `
+            <div class="bed-cell ${statusClass}" onclick="showBedDetails(${bed.id})">
+                <div class="bed-number">${bed.bed_number}</div>
+                <div class="bed-status">${bed.status}</div>
+                ${bed.occupant_name ? `<div class="bed-occupant">${bed.occupant_name}</div>` : ''}
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function displayBedTable(beds) {
+    const tbody = document.getElementById('beds-tbody');
+    
+    let html = '';
+    beds.forEach(bed => {
+        html += `
+            <tr>
+                <td>${bed.bed_number}</td>
+                <td>${bed.room}</td>
+                <td>${bed.type || 'Standard'}</td>
+                <td><span class="badge badge-${bed.status.toLowerCase()}">${bed.status}</span></td>
+                <td>${bed.occupant_name || '-'}</td>
+                <td>${bed.checkin_date ? new Date(bed.checkin_date).toLocaleDateString() : '-'}</td>
+                <td>${bed.expected_exit ? new Date(bed.expected_exit).toLocaleDateString() : '-'}</td>
+                <td>
+                    ${bed.status === 'available' ? 
+                        `<button class="btn btn-sm btn-primary" onclick="quickAssign(${bed.id})">Assign</button>` :
+                        `<button class="btn btn-sm btn-secondary" onclick="releaseBed(${bed.id})">Release</button>`
+                    }
+                    <button class="btn btn-sm btn-secondary" onclick="showBedDetails(${bed.id})">Details</button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html || '<tr><td colspan="8">No beds found</td></tr>';
+}
+
+async function loadAvailableBeds() {
+    try {
+        const result = await Auth.apiCall('bed/available');
+        
+        if (result.success && result.beds) {
+            const select = document.getElementById('bed-select');
+            let html = '<option value="">-- Select Available Bed --</option>';
+            
+            result.beds.forEach(bed => {
+                html += `<option value="${bed.id}">${bed.bed_number} - ${bed.room}</option>`;
+            });
+            
+            select.innerHTML = html;
+        }
+    } catch (error) {
+        console.error('Error loading available beds:', error);
+    }
+}
+
+async function loadClients() {
+    try {
+        const result = await Auth.apiCall('client/list');
+        
+        if (result.success && result.clients) {
+            const select = document.getElementById('client-select');
+            let html = '<option value="">-- Select Client --</option>';
+            
+            result.clients.forEach(client => {
+                html += `<option value="${client.id}">${client.first_name} ${client.last_name}</option>`;
+            });
+            
+            select.innerHTML = html;
+        }
+    } catch (error) {
+        console.error('Error loading clients:', error);
+    }
+}
+
+async function assignBed(e) {
+    e.preventDefault();
+    
+    const data = {
+        bed_id: document.getElementById('bed-select').value,
+        client_id: document.getElementById('client-select').value,
+        checkin_date: document.getElementById('checkin-date').value,
+        expected_exit: document.getElementById('exit-date').value,
+        notes: document.getElementById('assignment-notes').value
+    };
+    
+    try {
+        const result = await Auth.apiCall('bed/assign', data, 'POST');
+        
+        if (result.success) {
+            alert('Bed assigned successfully');
+            closeModal('assign-bed-modal');
+            loadBeds();
+        } else {
+            alert('Failed to assign bed: ' + result.message);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
+function showAssignBedModal() {
+    document.getElementById('assign-bed-modal').classList.remove('hidden');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+}
+
+function applyFilters() {
+    loadBeds();
+}
+
+function quickAssign(bedId) {
+    document.getElementById('bed-select').value = bedId;
+    showAssignBedModal();
+}
+
+async function releaseBed(bedId) {
+    if (!confirm('Release this bed?')) return;
+    
+    try {
+        const result = await Auth.apiCall('bed/release', { bed_id: bedId }, 'POST');
+        
+        if (result.success) {
+            alert('Bed released successfully');
+            loadBeds();
+        } else {
+            alert('Failed to release bed: ' + result.message);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
+function showBedDetails(bedId) {
+    alert('Bed details for ID: ' + bedId);
+}
+</script>
+
+<style>
+.bed-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.bed-cell {
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.bed-cell:hover {
+    transform: translateY(-2px);
+}
+
+.bed-cell.available {
+    background: #d4edda;
+    border: 2px solid #28a745;
+}
+
+.bed-cell.occupied {
+    background: #f8d7da;
+    border: 2px solid #dc3545;
+}
+
+.bed-cell.maintenance {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+}
+
+.bed-cell.reserved {
+    background: #d1ecf1;
+    border: 2px solid #17a2b8;
+}
+
+.bed-number {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.bed-status {
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.bed-occupant {
+    font-size: 11px;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge-available { background: #28a745; color: white; }
+.badge-occupied { background: #dc3545; color: white; }
+.badge-maintenance { background: #ffc107; color: black; }
+.badge-reserved { background: #17a2b8; color: white; }
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+</style>

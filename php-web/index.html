@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transition House - Shelter Management Platform</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loader"></div>
+        <p>Loading Transition House...</p>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <h1 id="app-title">🏠 Transition House</h1>
+                <p id="app-subtitle">Shelter Management Platform</p>
+            </div>
+            
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" class="form-control" required autofocus>
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" class="form-control" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">Login</button>
+                
+                <div class="login-links">
+                    <a href="#" id="forgot-password">Forgot Password?</a>
+                    <a href="#" id="register-link">Register</a>
+                </div>
+            </form>
+            
+            <div id="login-message" class="message"></div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" class="app hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <button id="menu-toggle" class="btn-icon">☰</button>
+                <h1 id="page-title">Dashboard</h1>
+            </div>
+            
+            <div class="header-right">
+                <button id="notifications-btn" class="btn-icon">
+                    🔔
+                    <span id="notification-badge" class="badge hidden">0</span>
+                </button>
+                <div class="user-menu">
+                    <button id="user-menu-btn" class="user-button">
+                        <span id="user-name">User</span>
+                        <span id="user-avatar">👤</span>
+                    </button>
+                    <div id="user-dropdown" class="dropdown-menu hidden">
+                        <a href="#" onclick="navigateTo('profile')">Profile</a>
+                        <a href="#" onclick="navigateTo('settings')">Settings</a>
+                        <a href="#" id="logout-btn">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h2 id="nav-title">Navigation</h2>
+            </div>
+            
+            <div class="nav-menu" id="nav-menu">
+                <!-- Navigation items will be populated based on user role -->
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="main-content">
+            <!-- Content pages will be loaded here -->
+            <div id="page-container"></div>
+        </main>
+
+        <!-- Notifications Panel -->
+        <div id="notifications-panel" class="notifications-panel hidden">
+            <div class="panel-header">
+                <h3>Notifications</h3>
+                <button id="close-notifications" class="btn-close">×</button>
+            </div>
+            <div id="notifications-list" class="notifications-list">
+                <!-- Notifications will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/navigation.js"></script>
+</body>
+</html>

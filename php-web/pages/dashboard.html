@@ -1,0 +1,191 @@
+<div class="dashboard">
+    <h2>Client Dashboard</h2>
+    
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" id="current-status">Active</div>
+            <div class="stat-label">Current Status</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value" id="days-in-shelter">0</div>
+            <div class="stat-label">Days in Shelter</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value" id="goals-completed">0/0</div>
+            <div class="stat-label">Goals Completed</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-value" id="upcoming-appointments">0</div>
+            <div class="stat-label">Upcoming Appointments</div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="card">
+        <h3>Quick Actions</h3>
+        <div class="grid grid-3">
+            <button class="btn btn-primary" onclick="navigateTo('bed-request')">🛏️ Request Bed</button>
+            <button class="btn btn-primary" onclick="navigateTo('goals')">🎯 View Goals</button>
+            <button class="btn btn-primary" onclick="navigateTo('appointments')">📅 My Appointments</button>
+            <button class="btn btn-secondary" onclick="navigateTo('messages')">💬 Messages</button>
+            <button class="btn btn-secondary" onclick="navigateTo('documents')">📄 Documents</button>
+            <button class="btn btn-secondary" onclick="navigateTo('resources')">📚 Resources</button>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="grid grid-2">
+        <div class="card">
+            <h3>Recent Activity</h3>
+            <div id="recent-activity">
+                <p>Loading...</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>Upcoming Events</h3>
+            <div id="upcoming-events">
+                <p>No upcoming events</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- My Goals Progress -->
+    <div class="card">
+        <h3>My Goals</h3>
+        <div id="goals-list">
+            <p>Loading goals...</p>
+        </div>
+        <button class="btn btn-secondary mt-2" onclick="navigateTo('goals')">View All Goals</button>
+    </div>
+</div>
+
+<script>
+function init_dashboard() {
+    loadDashboardData();
+}
+
+async function loadDashboardData() {
+    try {
+        const result = await Auth.apiCall('client/dashboard');
+        
+        if (result.success) {
+            // Update stats
+            if (result.stats) {
+                document.getElementById('current-status').textContent = result.stats.status || 'Active';
+                document.getElementById('days-in-shelter').textContent = result.stats.days_in_shelter || '0';
+                document.getElementById('goals-completed').textContent = 
+                    `${result.stats.goals_completed || 0}/${result.stats.total_goals || 0}`;
+                document.getElementById('upcoming-appointments').textContent = 
+                    result.stats.upcoming_appointments || '0';
+            }
+            
+            // Load recent activity
+            if (result.recent_activity) {
+                displayRecentActivity(result.recent_activity);
+            }
+            
+            // Load goals
+            if (result.goals) {
+                displayGoals(result.goals);
+            }
+        }
+    } catch (error) {
+        console.error('Error loading dashboard:', error);
+    }
+}
+
+function displayRecentActivity(activities) {
+    const container = document.getElementById('recent-activity');
+    
+    if (!activities || activities.length === 0) {
+        container.innerHTML = '<p>No recent activity</p>';
+        return;
+    }
+    
+    let html = '<ul class="activity-list">';
+    activities.forEach(activity => {
+        html += `
+            <li>
+                <strong>${activity.type}</strong>
+                <p>${activity.description}</p>
+                <small>${App.formatDate(activity.created_at)}</small>
+            </li>
+        `;
+    });
+    html += '</ul>';
+    
+    container.innerHTML = html;
+}
+
+function displayGoals(goals) {
+    const container = document.getElementById('goals-list');
+    
+    if (!goals || goals.length === 0) {
+        container.innerHTML = '<p>No goals set yet. <a href="#" onclick="navigateTo(\'goals\')">Create your first goal</a></p>';
+        return;
+    }
+    
+    let html = '<div class="goals-grid">';
+    goals.slice(0, 3).forEach(goal => {
+        const progress = Math.round((goal.completed_tasks / goal.total_tasks) * 100) || 0;
+        html += `
+            <div class="goal-item">
+                <h4>${goal.title}</h4>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progress}%"></div>
+                </div>
+                <p>${progress}% complete</p>
+            </div>
+        `;
+    });
+    html += '</div>';
+    
+    container.innerHTML = html;
+}
+</script>
+
+<style>
+.activity-list {
+    list-style: none;
+    padding: 0;
+}
+
+.activity-list li {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.activity-list li:last-child {
+    border-bottom: none;
+}
+
+.goals-grid {
+    display: grid;
+    gap: 15px;
+}
+
+.goal-item {
+    padding: 15px;
+    background: var(--light-bg);
+    border-radius: 4px;
+}
+
+.progress-bar {
+    height: 10px;
+    background: #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--success-color);
+    transition: width 0.3s;
+}
+</style>
